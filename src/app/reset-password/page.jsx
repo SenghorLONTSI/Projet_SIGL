@@ -1,0 +1,123 @@
+"use client"
+
+import { useState } from "react"
+import { Navbar } from "@/components/Navbar"
+import { Button } from "@/components/ui/button"
+import {
+  Card,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+  CardContent,
+  CardFooter,
+} from "@/components/ui/card"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
+import { Loader2 } from "lucide-react"
+
+export default function ResetPasswordPage() {
+  const [password, setPassword] = useState("")
+  const [confirmPassword, setConfirmPassword] = useState("")
+  const [loading, setLoading] = useState(false)
+  const [message, setMessage] = useState("")
+
+  const handleSubmit = (e) => {
+    e.preventDefault()
+    setMessage("")
+
+    if (!password || !confirmPassword) {
+      setMessage("❌ Veuillez remplir les deux champs.")
+      return
+    }
+
+    if (password !== confirmPassword) {
+      setMessage("❌ Les mots de passe ne correspondent pas.")
+      return
+    }
+
+    setLoading(true)
+
+    // Simulation d’une requête API
+    setTimeout(() => {
+      setLoading(false)
+      setMessage("✅ Votre mot de passe a été réinitialisé avec succès !")
+      setPassword("")
+      setConfirmPassword("")
+    }, 2000)
+  }
+
+  return (
+    <>
+      <Navbar />
+      <div className="flex min-h-[calc(100vh-4rem)] items-center justify-center bg-gray-50 p-4">
+        <Card className="w-full max-w-sm">
+          <CardHeader>
+            <CardTitle>Réinitialiser le mot de passe</CardTitle>
+            <CardDescription>
+              Entrez et confirmez votre nouveau mot de passe ci-dessous.
+            </CardDescription>
+          </CardHeader>
+
+          <CardContent>
+            <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+              <div>
+                <Label htmlFor="password">Nouveau mot de passe</Label>
+                <Input
+                  id="password"
+                  type="password"
+                  placeholder="********"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  required
+                />
+              </div>
+
+              <div>
+                <Label htmlFor="confirmPassword">Confirmer le mot de passe</Label>
+                <Input
+                  id="confirmPassword"
+                  type="password"
+                  placeholder="********"
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
+                  required
+                />
+              </div>
+
+              {/* Message de confirmation ou d’erreur */}
+              {message && (
+                <p
+                  className={`text-sm ${
+                    message.startsWith("✅") ? "text-green-600" : "text-red-500"
+                  }`}
+                >
+                  {message}
+                </p>
+              )}
+
+              <CardFooter className="flex flex-col gap-2 mt-4 p-0">
+                <Button type="submit" className="w-full" disabled={loading}>
+                  {loading ? (
+                    <>
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      Réinitialisation...
+                    </>
+                  ) : (
+                    "Réinitialiser"
+                  )}
+                </Button>
+
+                <p className="text-sm text-gray-600 mt-2">
+                  Revenir à la{" "}
+                  <a href="/login" className="text-blue-600 hover:underline">
+                    page de connexion
+                  </a>
+                </p>
+              </CardFooter>
+            </form>
+          </CardContent>
+        </Card>
+      </div>
+    </>
+  )
+}
