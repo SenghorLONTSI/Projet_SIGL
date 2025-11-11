@@ -14,6 +14,16 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+enum Role {
+  USER
+  ADMIN
+  APPRENTI
+  MA
+  TP
+  CA
+  RH
+}
+
 model Post {
   id      Int     @id @default(autoincrement())
   title   String
@@ -26,19 +36,75 @@ model Post {
 }
 
 model User {
-  id            String    @id
+  id            Int       @id @default(autoincrement())
   name          String
   subName       String?
   email         String
+  password      String
   emailVerified Boolean   @default(false)
   image         String?
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @default(now()) @updatedAt
   sessions      Session[]
   accounts      Account[]
+  role          Role      @default(USER)
+  apprenti      Apprenti?
+  ma            MA?
+  tp            TP?
 
   @@unique([email])
   @@map("user")
+}
+
+model Apprenti {
+  id     Int  @id @default(autoincrement())
+  userId Int  @unique
+  user   User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  name    String
+  subName String?
+
+  // ⇩⇩⇩ change ici : référence les tables MA et TP
+  idMA Int?
+  ma   MA?  @relation("MA_Apprentis", fields: [idMA], references: [id])
+
+  idTP Int?
+  tp   TP?  @relation("TP_Apprentis", fields: [idTP], references: [id])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now()) @updatedAt
+
+  @@map("apprenti")
+}
+
+model MA {
+  id     Int  @id @default(autoincrement())
+  userId Int  @unique
+  user   User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  name    String
+  subName String?
+
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @default(now()) @updatedAt
+  apprentis Apprenti[] @relation("MA_Apprentis")
+
+  @@map("ma")
+}
+
+model TP {
+  id     Int  @id @default(autoincrement())
+  userId Int  @unique
+  user   User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  name    String
+  subName String?
+
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @default(now()) @updatedAt
+  apprentis Apprenti[] @relation("TP_Apprentis")
+
+  @@map("tp")
 }
 
 model Session {
@@ -49,7 +115,7 @@ model Session {
   updatedAt DateTime @updatedAt
   ipAddress String?
   userAgent String?
-  userId    String
+  userId    Int
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([token])
@@ -60,7 +126,7 @@ model Account {
   id                    String    @id
   accountId             String
   providerId            String
-  userId                String
+  userId                Int
   user                  User      @relation(fields: [userId], references: [id], onDelete: Cascade)
   accessToken           String?
   refreshToken          String?
@@ -76,7 +142,7 @@ model Account {
 }
 
 model Verification {
-  id         String   @id
+  id         Int      @id
   identifier String
   value      String
   expiresAt  DateTime
