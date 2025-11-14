@@ -1,8 +1,10 @@
 "use client";
 
 import React from "react";
-import { signIn } from "@/lib/auth-client";
+import { useState } from "react";
+import { signUp } from "@/lib/auth-client";
 import { useForm } from "react-hook-form";
+import { useRouter } from "next/navigation";
 import {
   Card,
   CardHeader,
@@ -22,43 +24,75 @@ import {
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Toaster, toast } from "sonner";
-import { useRouter } from "next/navigation";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 
-const pageSignIn = () => {
+const pageSignUp = () => {
+  const formSchema = z.object({
+    name: z
+      .string()
+      .min(3, "Veuillez entrer au moins trois (3) caractères ")
+      .max(50, "Veuillez entrer moins de carctères"),
+
+    email: z.string().email("Veuillez entrer une adresse email valide"),
+    password: z
+      .string()
+      .min(2, "Veuillez entrer au moins huit (8) caractères ")
+      .max(50, "Veuillez entrer moins de carctères"),
+  });
+
   const form = useForm({
+    resolver: zodResolver(formSchema),
     defaultValues: {
-      email: "",
+      name: "",
       password: "",
+      email: "",
     },
     mode: "onChange",
   });
+
+  const [loading, setLoading] = useState("false");
   const router = useRouter();
   async function onSubmit(values) {
-    const { password, email } = values;
-    const { data, error } = await signIn.email(
+    const { name, password, email } = values;
+    const { data, error } = await signUp.email(
       {
         email,
         password,
+        name,
         callbackURL: "/",
       },
       {
-        onSuccess: (ctx) => {
-          toast.success("🤪 Connexion réussie", {
+        onRequest: () => {
+          //show loading
+          setLoading(false);
+        },
+        onSuccess: () => {
+          //redirect to the dashboard or sign in page
+          toast.success("🤪 Compte créé", {
             description: "Direction la page d'accueil !",
           });
           router.push("/");
+          setLoading(true);
         },
+
         onError: (ctx) => {
-          toast.error("Erreur de connexion", {
-            description: "Vérifie tes identifiants et réessaie.",
+          // display the error message
+
+          toast.warning("Attention !", {
+            description: "Ce compte existe déjà",
             closeButton: true,
-            duration: 4000,
+            duration: 3000,
+            action: {
+              label: "Connecte-toi",
+              onClick: () => router.push("/login"),
+            },
           });
+          setLoading(true);
         },
       }
     );
+    console.log(values);
   }
 
   //put a button to trigger handleSubmit
@@ -78,7 +112,7 @@ const pageSignIn = () => {
       />
       <Card className="w-full max-w-md mx-auto my-20">
         <CardHeader>
-          <CardTitle>Connecte toi à ton compte</CardTitle>
+          <CardTitle>Crée ton compte</CardTitle>
           <CardDescription>
             Veuillez remplir les informations ci-dessous
           </CardDescription>
@@ -88,17 +122,16 @@ const pageSignIn = () => {
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
               <FormField
                 control={form.control}
-                name="email"
+                name="name"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Adresse email</FormLabel>
+                    <FormLabel>Nom</FormLabel>
                     <FormControl>
-                      <Input
-                        type="email"
-                        placeholder="atanjunior@mail.com"
-                        {...field}
-                      />
+                      <Input type="text" placeholder="Atango" {...field} />
                     </FormControl>
+                    {/* <FormDescription>
+                    This is your public display name.
+                  </FormDescription> */}
                     <FormMessage />
                   </FormItem>
                 )}
@@ -120,13 +153,30 @@ const pageSignIn = () => {
                   </FormItem>
                 )}
               />
+              <FormField
+                control={form.control}
+                name="email"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Adresse email</FormLabel>
+                    <FormControl>
+                      <Input
+                        type="email"
+                        placeholder="atanjunior@mail.com"
+                        {...field}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
               <div className="flex flex-col gap-2">
                 <Button
                   className=" relative "
                   type="submit"
-                  //   disabled={!loading}
+                  disabled={!loading}
                 >
-                  Se connecter
+                  Crée ton compte
                 </Button>
               </div>
             </form>
@@ -134,9 +184,9 @@ const pageSignIn = () => {
         </CardContent>
         <CardFooter className="flex flex-col space-y-2">
           <p className="text-sm text-muted-foreground text-center font-light">
-            Tu n'as pas de compte ?{" "}
-            <a href="/signup" className="text-blue-500 hover:underline">
-              Inscris-toi
+            Tu as déjà un compte ?{" "}
+            <a href="/login" className="text-blue-500 hover:underline">
+              Connecte-toi
             </a>
           </p>
         </CardFooter>
@@ -145,4 +195,4 @@ const pageSignIn = () => {
   );
 };
 
-export default pageSignIn;
+export default pageSignUp;

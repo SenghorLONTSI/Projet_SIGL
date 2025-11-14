@@ -1,9 +1,3 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
-
 generator client {
   provider = "prisma-client-js"
   output   = "../src/generated/prisma"
@@ -15,10 +9,9 @@ datasource db {
 }
 
 model Post {
-  id      Int     @id @default(autoincrement())
-  title   String
-  content String?
-
+  id        Int      @id @default(autoincrement())
+  title     String
+  content   String?
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
@@ -29,22 +22,25 @@ model User {
   id            String    @id
   name          String
   subName       String?
-  email         String
+  email         String    @unique
   emailVerified Boolean   @default(false)
   image         String?
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @default(now()) @updatedAt
-  sessions      Session[]
+  role          Role      @default(USER)
   accounts      Account[]
+  apprenti      apprenti?
+  ma            ma?
+  sessions      Session[]
+  tp            tp?
 
-  @@unique([email])
   @@map("user")
 }
 
 model Session {
   id        String   @id
   expiresAt DateTime
-  token     String
+  token     String   @unique
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
   ipAddress String?
@@ -52,7 +48,6 @@ model Session {
   userId    String
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  @@unique([token])
   @@map("session")
 }
 
@@ -60,8 +55,6 @@ model Account {
   id                    String    @id
   accountId             String
   providerId            String
-  userId                String
-  user                  User      @relation(fields: [userId], references: [id], onDelete: Cascade)
   accessToken           String?
   refreshToken          String?
   idToken               String?
@@ -71,17 +64,105 @@ model Account {
   password              String?
   createdAt             DateTime  @default(now())
   updatedAt             DateTime  @updatedAt
+  userId                String
+  user                  User      @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@map("account")
 }
 
 model Verification {
-  id         String   @id
   identifier String
   value      String
   expiresAt  DateTime
   createdAt  DateTime @default(now())
   updatedAt  DateTime @default(now()) @updatedAt
+  id         Int      @id
 
   @@map("verification")
 }
+
+model apprenti {
+  id        String   @id
+  userId    String   @unique
+  name      String
+  subName   String?
+  idMA      String
+  idTP      String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now())
+  ma        ma?      @relation(fields: [idMA], references: [id])
+  tp        tp?      @relation(fields: [idTP], references: [id])
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model ma {
+  id        String     @id
+  userId    String     @unique
+  name      String
+  subName   String?
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @default(now())
+  apprenti  apprenti[]
+  user      User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model tp {
+  id        String     @id
+  userId    String     @unique
+  name      String
+  subName   String?
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @default(now())
+  apprenti  apprenti[]
+  user      User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+enum Role {
+  USER
+  ADMIN
+  APPRENTI
+  MA
+  TP
+  CA
+  RH
+}
+
+/**
+ * model JournalTemplate{
+ * Id        Int      @id @default(autoincrement())
+ * code     String   @unique
+ * Titre     String
+ * periode   String
+ * description   String?
+ * deadline   DateTime?
+ * slot JournalSlot[]
+ * assignments JournalAssignment[]
+ * createdAt DateTime @default(now())
+ * updatedAt DateTime @updatedAt
+ * }
+ * model JournalAssignment{
+ * Id Int @id @default(autoincrement())
+ * templateId Int
+ * apprentiId Int
+ * statut AssignmentStatut
+ * cretedAt DateTime @default(now())
+ * updatedAt DateTime @updatedAt
+ * }
+ * model JournalSlot{
+ * Id        Int      @id @default(autoincrement())
+ * JournalTemplateId Int
+ * apprentiId Int?
+ * titre     String
+ * instruction String?
+ * mimeAuthorized String?
+ * maxSize Int?
+ * dueAt DateTime?
+ * isrequired Boolean @default(true)
+ * // statut SlotStatut @default(AVAILABLE)
+ * lastsubmissionAt DateTime?
+ * nbFiles Int @default(0)
+ * createdAt DateTime @default(now())
+ * updatedAt DateTime @updatedAt
+ * dayOfWeek Int
+ * }
+ */
