@@ -1,23 +1,20 @@
 import Image from "next/image";
 import { getUser } from "@/lib/auth-server";
-import { unauthorized } from "next/navigation";
+import { redirect } from "next/navigation";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 
 export default async function Home() {
   const user = await getUser();
   if (!user) {
-    return unauthorized();
+    redirect("/login"); // This will stop rendering and redirect the user.
   }
-  let roleDisplay = "";
-  switch (user.role) {
-    case "APPRENTI":
-      roleDisplay = "Apprenti";
-      break;
-    case "MA":
-      roleDisplay = "Maître d'apprentissage";
-      break;
-  }
-  console.log(user)
+
+  const roleMap = {
+    APPRENTI: "Apprenti",
+    MA: "Maître d'apprentissage",
+  };
+  const roleDisplay = roleMap[user.role] || user.role;
+
   return (
     <div className="max-w-sm mx-auto mt-10">
       <Card>
@@ -31,11 +28,15 @@ export default async function Home() {
           />
           <CardTitle>{user.name}</CardTitle>
         </CardHeader>
-        <CardContent className="text-center">
-          <span className="text-gray-800 font-medium mb-2">Adresse email</span>
-          <p className="text-gray-600 mb-1">{user.email}</p>
-          <span className="text-gray-800 font-medium mb-2">Rôle</span>
-          <p className="text-gray-500">{roleDisplay}</p>
+        <CardContent className="text-center space-y-4">
+          <div>
+            <span className="text-gray-800 font-medium">Adresse email</span>
+            <p className="text-gray-600">{user.email}</p>
+          </div>
+          <div>
+            <span className="text-gray-800 font-medium">Rôle</span>
+            <p className="text-gray-500">{roleDisplay}</p>
+          </div>
         </CardContent>
       </Card>
     </div>
