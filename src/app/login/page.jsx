@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useState } from "react";
 import { signIn } from "@/lib/auth-client";
 import { useForm } from "react-hook-form";
 import {
@@ -27,13 +27,22 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 
 const pageSignIn = () => {
+  const formSchema = z.object({
+    email: z.string().email("Veuillez entrer une adresse email valide"),
+    password: z
+      .string()
+      .min(8, "Veuillez entrer au moins huit (8) caractères ")
+      .max(50, "Veuillez entrer moins de carctères"),
+  });
   const form = useForm({
+    resolver: zodResolver(formSchema),
     defaultValues: {
       email: "",
       password: "",
     },
     mode: "onChange",
   });
+  const [loading, setLoading] = useState("false");
   const router = useRouter();
   async function onSubmit(values) {
     const { password, email } = values;
@@ -41,14 +50,19 @@ const pageSignIn = () => {
       {
         email,
         password,
-        callbackURL: "/",
+        // callbackURL: "/",
       },
       {
+        onRequest: () => {
+          //show loading
+          setLoading(false);
+        },
         onSuccess: (ctx) => {
           toast.success("🤪 Connexion réussie", {
             description: "Direction la page d'accueil !",
           });
           router.push("/");
+          setLoading(true);
         },
         onError: (ctx) => {
           toast.error("Erreur de connexion", {
@@ -56,6 +70,7 @@ const pageSignIn = () => {
             closeButton: true,
             duration: 4000,
           });
+          setLoading(true);
         },
       }
     );
@@ -124,7 +139,7 @@ const pageSignIn = () => {
                 <Button
                   className=" relative "
                   type="submit"
-                  //   disabled={!loading}
+                  disabled={!loading}
                 >
                   Se connecter
                 </Button>

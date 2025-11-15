@@ -37,7 +37,7 @@ const pageSignUp = () => {
     email: z.string().email("Veuillez entrer une adresse email valide"),
     password: z
       .string()
-      .min(2, "Veuillez entrer au moins huit (8) caractères ")
+      .min(8, "Veuillez entrer au moins huit (8) caractères ")
       .max(50, "Veuillez entrer moins de carctères"),
   });
 
@@ -60,7 +60,7 @@ const pageSignUp = () => {
         email,
         password,
         name,
-        callbackURL: "/",
+        //callbackURL: "/",
       },
       {
         onRequest: () => {
@@ -80,7 +80,9 @@ const pageSignUp = () => {
           // display the error message
 
           toast.warning("Attention !", {
-            description: "Ce compte existe déjà",
+            description:
+              ctx.error.message ||
+              "Une erreur est survenue lors de la création du compte.",
             closeButton: true,
             duration: 3000,
             action: {

@@ -1,22 +1,32 @@
 import Image from "next/image";
-import { getUser } from "@/lib/auth-server";
-import { redirect } from "next/navigation";
+import { getUser, getSession } from "@/lib/auth-server";
+import { unauthorized } from "next/navigation";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 
 export default async function Home() {
+  const session = await getSession();
+  if (!session) {
+    return unauthorized();
+  }
+
   const user = await getUser();
   if (!user) {
-    redirect("/login"); // This will stop rendering and redirect the user.
+    return unauthorized();
   }
 
   const roleMap = {
     APPRENTI: "Apprenti",
     MA: "Maître d'apprentissage",
+    USER: "Utilisateur",
+    TP: "Tuteur pédagogique",
   };
+
+  console.log("User role:", user.role);
   const roleDisplay = roleMap[user.role] || user.role;
 
   return (
     <div className="max-w-sm mx-auto mt-10">
+      <span className="text-2xl font-bold mb-4">Bienvenue sur SIGL !</span>
       <Card>
         <CardHeader className="flex flex-col items-center">
           <Image

@@ -1,7 +1,9 @@
 import { auth } from "@/lib/auth"
 
+
 export async function POST(request) {
     try {
+
         const body = await request.json();
         //console.log("📥 Received body:", body); // Debug
 
@@ -28,9 +30,9 @@ export async function POST(request) {
                 email,
                 password,
             },
+            asResponse: true,
         });
-        return Response.json(user, { status: 201 });
-
+        return user
     } catch (error) {
         console.error("❌ Sign in error:", error);
         return Response.json(

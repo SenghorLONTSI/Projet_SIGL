@@ -7,7 +7,7 @@ const Unauthorized = () => {
     <div>
       <Alert>
         <AlertTitle>Unauthorized</AlertTitle>
-        <p>You do not have permission to access this page.</p>
+        <p>Désole tu ne peux pas.</p>
       </Alert>
     </div>
   );

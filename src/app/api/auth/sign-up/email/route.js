@@ -22,8 +22,6 @@ export async function POST(request) {
             );
         }
 
-        console.log("✅ Password présent, length:", password.length); // Debug
-
         // Création de l'utilisateur via Better Auth
         const user = await auth.api.signUpEmail({
             body: {
@@ -31,11 +29,10 @@ export async function POST(request) {
                 password,
                 name: name || "User",
             },
+            asResponse: true,
         });
 
-        console.log("✅ User créé:", user); // Debug
-
-        return Response.json(user, { status: 201 });
+        return user
 
     } catch (error) {
         console.error("❌ Sign up error:", error);

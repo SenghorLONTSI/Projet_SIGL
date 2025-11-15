@@ -1,3 +1,4 @@
+
 import { headers } from "next/headers";
 import { auth } from "../lib/auth";
 
@@ -5,20 +6,17 @@ export const getSession = async () => {
     const session = await auth.api.getSession({
         headers: await headers(),
     });
-
     if (!session) {
-        // On jette une Response directement pour rester compatible avec les handlers Next
-        throw new Response(JSON.stringify({ error: "Unauthorized" }), {
-            status: 401,
-            headers: { "Content-Type": "application/json" },
-        });
+        return null;
     }
-
     return session;
 }
 
 export const getUser = async () => {
     const session = await getSession();
+    if (!session) {
+        return null;
+    }
     return session?.user || null;
 }
 
