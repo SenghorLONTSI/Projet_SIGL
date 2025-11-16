@@ -1,6 +1,4 @@
 import React from "react";
-import { getUser } from "@/lib/auth-server";
-import { unauthorized } from "next/navigation";
 import { Alert, AlertTitle } from "@/components/ui/alert";
 const Unauthorized = () => {
   return (

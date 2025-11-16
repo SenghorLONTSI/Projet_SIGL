@@ -24,7 +24,7 @@ export function Navbar() {
     error: statusError,
   } = authClient.useSession();
   const router = useRouter();
-  console.log(session, status);
+  console.log(session, statusPending);
 
   const handleSignOut = async () => {
     await authClient.signOut();

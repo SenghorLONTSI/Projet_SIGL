@@ -1,0 +1,86 @@
+import { getSession, getUser } from "@/lib/auth-server";
+import { redirect } from "next/navigation";
+import { prisma } from "@/lib/prisma";
+import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
+
+export default async function MesApprentisPage() {
+  // 1️⃣ Vérifier la session
+  const session = await getSession();
+  if (!session) {
+    redirect("/login");
+  }
+
+  const user = await getUser();
+  if (!user) {
+    redirect("/login");
+  }
+
+  // 2️⃣ Récupérer le ma associé à l'utilisateur
+  const ma = await prisma.ma.findUnique({
+    where: {
+      userId: user.id,
+    },
+  });
+
+  if (!ma) {
+    return (
+      <div className="max-w-2xl mx-auto mt-10 space-y-6">
+        <h1 className="text-2xl font-bold">Mes apprentis</h1>
+        <p className="text-gray-500 text-sm">
+          Vous n'êtes pas enregistré en tant que Maître d'apprentissage.
+        </p>
+      </div>
+    );
+  }
+
+  // 3️⃣ Récupérer les apprentis dont idMA = id du ma
+  const apprentis = await prisma.apprenti.findMany({
+    where: {
+      idMA: ma.id,
+    },
+    include: {
+      user: true, // pour récupérer email de l'apprenti, si besoin
+    },
+  });
+
+  return (
+    <div className="max-w-2xl mx-auto mt-10 space-y-6">
+      <h1 className="text-2xl font-bold">Mes apprentis</h1>
+
+      {apprentis.length === 0 ? (
+        <p className="text-gray-500 text-sm">
+          Aucun apprenti trouvé pour ton id en tant que MA.
+        </p>
+      ) : (
+        <div className="space-y-3">
+          {apprentis.map((a) => (
+            <Card key={a.id}>
+              <CardHeader>
+                <CardTitle>
+                  {a.name} {a.subName ?? ""}
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-1 text-sm text-gray-700">
+                <p>
+                  <span className="font-medium">ID apprenti :</span> {a.id}
+                </p>
+                <p>
+                  <span className="font-medium">idMA :</span> {a.idMA}
+                </p>
+                <p>
+                  <span className="font-medium">idTP :</span> {a.idTP}
+                </p>
+                {a.user && (
+                  <p>
+                    <span className="font-medium">Email :</span>{" "}
+                    {a.user.email}
+                  </p>
+                )}
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
