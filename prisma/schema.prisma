@@ -1,9 +1,3 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
-
 generator client {
   provider = "prisma-client-js"
   output   = "../src/generated/prisma"
@@ -14,21 +8,10 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-enum Role {
-  USER
-  ADMIN
-  APPRENTI
-  MA
-  TP
-  CA
-  RH
-}
-
 model Post {
-  id      Int     @id @default(autoincrement())
-  title   String
-  content String?
-
+  id        Int      @id @default(autoincrement())
+  title     String
+  content   String?
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
@@ -36,73 +19,64 @@ model Post {
 }
 
 model User {
-  id            Int       @id @default(autoincrement())
+  id            String    @id
   name          String
   subName       String?
-  email         String
-  password      String
-  emailVerified Boolean   @default(false)
+  email         String    @unique
+  emailVerified Boolean
   image         String?
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @default(now()) @updatedAt
-  sessions      Session[]
-  accounts      Account[]
   role          Role      @default(USER)
+  createdAt     DateTime
+  updatedAt     DateTime  @updatedAt
+  accounts      Account[]
   apprenti      Apprenti?
   ma            MA?
+  sessions      Session[]
   tp            TP?
 
-  @@unique([email])
   @@map("user")
 }
 
 model Apprenti {
-  id     Int  @id @default(autoincrement())
-  userId Int  @unique
-  user   User @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  name    String
-  subName String?
-
-  // ⇩⇩⇩ change ici : référence les tables MA et TP
-  idMA Int?
-  ma   MA?  @relation("MA_Apprentis", fields: [idMA], references: [id])
-
-  idTP Int?
-  tp   TP?  @relation("TP_Apprentis", fields: [idTP], references: [id])
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @default(now()) @updatedAt
+  id                 String              @id
+  userId             String              @unique
+  name               String
+  subName            String?
+  idMA               String
+  idTP               String
+  createdAt          DateTime            @default(now())
+  updatedAt          DateTime            @default(now()) @updatedAt
+  ma                 MA                  @relation("MA_Apprentis", fields: [idMA], references: [id])
+  tp                 TP                  @relation("TP_Apprentis", fields: [idTP], references: [id])
+  user               User                @relation(fields: [userId], references: [id], onDelete: Cascade)
+  journalAssignments JournalAssignment[]
+  journalSlots       JournalSlot[]
 
   @@map("apprenti")
 }
 
 model MA {
-  id     Int  @id @default(autoincrement())
-  userId Int  @unique
-  user   User @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  name    String
-  subName String?
-
+  id        String     @id
+  userId    String     @unique
+  name      String
+  subName   String?
   createdAt DateTime   @default(now())
   updatedAt DateTime   @default(now()) @updatedAt
   apprentis Apprenti[] @relation("MA_Apprentis")
+  user      User       @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@map("ma")
 }
 
 model TP {
-  id     Int  @id @default(autoincrement())
-  userId Int  @unique
-  user   User @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  name    String
-  subName String?
-
+  id        String     @id
+  userId    String     @unique
+  name      String
+  subName   String?
   createdAt DateTime   @default(now())
   updatedAt DateTime   @default(now()) @updatedAt
   apprentis Apprenti[] @relation("TP_Apprentis")
+  user      User       @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@map("tp")
 }
@@ -110,24 +84,21 @@ model TP {
 model Session {
   id        String   @id
   expiresAt DateTime
-  token     String
-  createdAt DateTime @default(now())
+  token     String   @unique
+  createdAt DateTime
   updatedAt DateTime @updatedAt
   ipAddress String?
   userAgent String?
-  userId    Int
+  userId    String
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  @@unique([token])
   @@map("session")
 }
 
 model Account {
   id                    String    @id
-  accountId             String
   providerId            String
-  userId                Int
-  user                  User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId                String
   accessToken           String?
   refreshToken          String?
   idToken               String?
@@ -135,19 +106,122 @@ model Account {
   refreshTokenExpiresAt DateTime?
   scope                 String?
   password              String?
-  createdAt             DateTime  @default(now())
+  createdAt             DateTime
   updatedAt             DateTime  @updatedAt
+  accountId             String
+  user                  User      @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@map("account")
 }
 
 model Verification {
-  id         Int      @id
   identifier String
   value      String
   expiresAt  DateTime
   createdAt  DateTime @default(now())
   updatedAt  DateTime @default(now()) @updatedAt
+  id         Int      @id
 
   @@map("verification")
+}
+
+/// Modèle de journal (défini par l’admin)
+model JournalTemplate {
+  id          Int                 @id @default(autoincrement())
+  code        String              @unique
+  Titre       String
+  periode     String
+  description String?
+  deadline    DateTime?
+  createdAt   DateTime            @default(now())
+  updatedAt   DateTime            @updatedAt
+  assignments JournalAssignment[]
+  slots       JournalSlot?        @relation("TemplateSlots")
+
+  @@map("journal_template")
+}
+
+/// Affectation d’un journal à un apprenti (c’est “le journal de l’apprenti”)
+model JournalAssignment {
+  id         Int              @id @default(autoincrement())
+  templateId Int
+  apprentiId String
+  statut     AssignmentStatut @default(EN_COURS)
+  createdAt  DateTime         @default(now())
+  updatedAt  DateTime         @updatedAt
+  documents  Document[]
+  apprenti   Apprenti         @relation(fields: [apprentiId], references: [id])
+  template   JournalTemplate  @relation(fields: [templateId], references: [id])
+
+  @@map("journal_assignment")
+}
+
+/// Section/étape à compléter (Semaine 1, Rapport final, etc.)
+model JournalSlot {
+  id                Int             @id @default(autoincrement())
+  journalTemplateId Int             @unique
+  apprentiId        String?
+  titre             String
+  instruction       String?
+  mimeAuthorized    String?
+  maxSize           Int?
+  dueAt             DateTime?
+  isrequired        Boolean         @default(true)
+  statut            SlotStatut      @default(PENDING)
+  lastsubmissionAt  DateTime?
+  nbFiles           Int             @default(0)
+  createdAt         DateTime        @default(now())
+  updatedAt         DateTime        @updatedAt
+  documents         Document[]
+  apprenti          Apprenti?       @relation(fields: [apprentiId], references: [id])
+  template          JournalTemplate @relation("TemplateSlots", fields: [journalTemplateId], references: [id])
+
+  @@map("journal_slot")
+}
+
+/// Fichier déposé soit sur un SLOT, soit directement sur l’AFFECTATION (journal sans slots)
+model Document {
+  id                  Int                @id @default(autoincrement())
+  journalSlotId       Int?
+  journalAssignmentId Int?
+  fileName            String
+  mimeType            String
+  size                Int
+  url                 String
+  status              DocStatus          @default(UPLOADED)
+  createdAt           DateTime           @default(now())
+  assignment          JournalAssignment? @relation(fields: [journalAssignmentId], references: [id], onDelete: Cascade)
+  slot                JournalSlot?       @relation(fields: [journalSlotId], references: [id], onDelete: Cascade)
+
+  @@map("document")
+}
+
+enum Role {
+  APPRENTI
+  MA
+  TP
+  RH
+  USER
+  ADMIN
+  CA
+}
+
+enum SlotStatut {
+  PENDING
+  SUBMITTED
+  VALIDATED
+  REJECTED
+}
+
+enum AssignmentStatut {
+  EN_COURS
+  TERMINE
+  EN_RETARD
+}
+
+enum DocStatus {
+  UPLOADED
+  SUBMITTED
+  APPROVED
+  REJECTED
 }

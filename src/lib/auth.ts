@@ -1,20 +1,10 @@
-import { betterAuth } from "better-auth";
-import { prismaAdapter } from "better-auth/adapters/prisma";
-//import { PrismaClient } from '@prisma/client';
-import { prisma } from "../lib/prisma";
+import { cookies } from "next/headers";
+import { PrismaClient } from "@prisma/client";
+const prisma = new PrismaClient();
 
+export type ApprentiAuth = { userId: number; apprentiId: number; role: "APPRENTI" | "ADMIN" | "USER" | "MA" | "TP" | "CA" | "RH" };
 
-export const auth = betterAuth({
-    database: prismaAdapter(prisma, {
-        provider: "postgresql",
-    }),
-
-    emailAndPassword: {
-        enabled: true,
-    },
-}) 
-
-export async function requireApprenti() {
+export async function requireApprenti(): Promise<ApprentiAuth> {
   // Simple lecture d'un token "session" (ou header Authorization Bearer)
   const token = cookies().get("session")?.value;
   if (!token) throw new Error("UNAUTHENTICATED");
@@ -31,5 +21,5 @@ export async function requireApprenti() {
   const apprenti = await prisma.apprenti.findUnique({ where: { userId: user.id } });
   if (!apprenti) throw new Error("APPRENTI_NOT_FOUND");
 
-  return { userId: user.id, apprentiId: apprenti.id, role: user.role  };
+  return { userId: user.id, apprentiId: apprenti.id, role: user.role as any };
 }
