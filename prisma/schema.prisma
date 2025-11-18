@@ -87,8 +87,8 @@ model apprenti {
   userId    String   @unique
   name      String
   subName   String?
-  idMA      String
-  idTP      String
+  idMA      String?
+  idTP      String?
   createdAt DateTime @default(now())
   updatedAt DateTime @default(now())
   ma        ma?      @relation(fields: [idMA], references: [id])
