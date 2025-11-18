@@ -33,6 +33,8 @@ model User {
   apprenti      apprenti?
   ma            ma?
   tp            tp?
+  maReviews Review[] @relation("MAUserReviews")
+
 
   @@map("user")
 }
@@ -87,8 +89,8 @@ model apprenti {
   userId    String   @unique
   name      String
   subName   String?
-  idMA      String
-  idTP      String
+  idMA      String?
+  idTP      String?
   createdAt DateTime @default(now())
   updatedAt DateTime @default(now())
   ma        ma?      @relation(fields: [idMA], references: [id])
@@ -96,7 +98,7 @@ model apprenti {
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   journalAssignments JournalAssignment[] 
   journalSlots       JournalSlot[]       
-
+  @@index([idMA])
 }
 
 model ma {
@@ -178,6 +180,8 @@ model JournalAssignment {
   updatedAt DateTime        @updatedAt
 
   documents Document[]
+  reviews Review[] @relation("AssignmentReviews")
+
 
   @@map("journal_assignment")
 }
@@ -206,6 +210,22 @@ model JournalSlot {
   @@map("journal_slot")
 }
 
+model Review{
+  id Int                                  @id @default(autoincrement())
+  assignmentId Int
+  maId String 
+  note Int? 
+  commentaire String?
+  createdAt DateTime                      @default(now())
+  updatedAt DateTime                      @updatedAt
+  assignment JournalAssignment            @relation("AssignmentReviews", fields: [assignmentId], references: [id], onDelete: Cascade)
+  ma User                                 @relation("MAUserReviews", fields: [maId], references: [id], onDelete: Cascade)
+
+
+  @@index([assignmentId])
+  @@index([maId])
+  @@map("review")
+}
 model Document {
   id Int @id @default(autoincrement())
 

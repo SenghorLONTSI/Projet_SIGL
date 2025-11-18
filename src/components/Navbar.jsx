@@ -24,7 +24,6 @@ export function Navbar() {
     error: statusError,
   } = authClient.useSession();
   const router = useRouter();
-  console.log(session, status);
 
   const handleSignOut = async () => {
     await authClient.signOut();
@@ -86,7 +85,10 @@ export function Navbar() {
                   </div>
                 </DropdownMenuLabel>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem onClick={handleSignOut}>
+                <DropdownMenuItem
+                  className="hover:bg-red-50"
+                  onClick={handleSignOut}
+                >
                   Se déconnecter
                 </DropdownMenuItem>
               </DropdownMenuContent>
