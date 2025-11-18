@@ -23,6 +23,8 @@ export const ACTIONS = {
     JOURNAL_CREATE: "journal:create",
     JOURNAL_UPDATE: "journal:update",
     JOURNAL_DELETE: "journal:delete",
+    JOURNAL_VIEW: "journal:view",
+    APPRENTI_ASS_VIEW: "apprenti:assignment:view",
     REVIEW_CREATE: "review:create",
     REVIEW_UPDATE: "review:update",
     REVIEW_COMMENT: "review:comment",
@@ -45,6 +47,7 @@ export const rolePermissions = {
         ACTIONS.REVIEW_UPDATE,
         ACTIONS.REVIEW_COMMENT,
         ACTIONS.REVIEW_NOTE,
+        ACTIONS.APPRENTI_ASS_VIEW
     ],
     [ROLES.TP]: [],
     [ROLES.CA]: [],

@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { getSession, getUser } from "@/lib/auth-server";
+import { getSession, getUser, requireRole } from "@/lib/auth-server";
 import { prisma } from "@/lib/prisma";
 
 export async function GET() {
@@ -24,6 +24,9 @@ export async function GET() {
   const ma = await prisma.ma.findUnique({
     where: { userId: user.id },
   });
+
+  //verifier le rôle MA
+  requireRole(session, "apprenti:assignment:view");
 
   if (!ma) {
     return NextResponse.json(

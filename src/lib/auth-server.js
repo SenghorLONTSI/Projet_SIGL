@@ -96,7 +96,7 @@ export async function requireOwnership(session, resourceId, resourceType) {
         if (!canAccess) {
             throw new Response(JSON.stringify({ error: "Forbidden" }), { status: 403, headers: { "Content-Type": "application/json" } });
         }
-        return; // OK pour MA lié
+        return;
     }
     // Ajoutez d'autres types de ressources ici si nécessaire
 

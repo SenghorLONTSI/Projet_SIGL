@@ -49,7 +49,8 @@ export default function MesApprentisPage() {
       list = list.filter((a) => {
         const fullName = `${a.name ?? ""} ${a.subName ?? ""}`.toLowerCase();
         const apprEmail = a.user?.email?.toLowerCase() ?? "";
-        const tpName = `${a.tp?.name ?? ""} ${a.tp?.subName ?? ""}`.toLowerCase();
+        const tpName =
+          `${a.tp?.name ?? ""} ${a.tp?.subName ?? ""}`.toLowerCase();
         const tpEmail = a.tp?.user?.email?.toLowerCase() ?? "";
 
         return (
@@ -200,6 +201,7 @@ export default function MesApprentisPage() {
           Aucun apprenti ne vous est encore assigné en tant que MA.
         </p>
       )}
+      {console.log(!loading, error, total)}
 
       {/* Grille des cartes */}
       {!loading && !error && filteredApprentis.length > 0 && (
