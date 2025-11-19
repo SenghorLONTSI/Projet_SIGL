@@ -42,6 +42,7 @@ export default async function Home() {
           <div>
             <span className="text-gray-800 font-medium">Adresse email</span>
             <p className="text-gray-600">{user.email}</p>
+            <p className="text-gray-600">{user.id}</p>
           </div>
           <div>
             <span className="text-gray-800 font-medium">Rôle</span>
