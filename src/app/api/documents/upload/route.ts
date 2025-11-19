@@ -93,3 +93,66 @@ export async function POST(req: Request) {
     );
   }
 }
+/////////////////////////////Cette fonction GET permet de récupérer les documents liés aux journaux d'apprentissage/////////////////////////////
+export async function GET(req: Request) {
+  try {
+    // ----------------------------------------
+    // 1️⃣ Récupérer la session Better-Auth
+    // ----------------------------------------
+    const session = await auth.api.getSession({
+      headers: req.headers,
+    });
+
+    if (!session?.user?.id) {
+      return NextResponse.json(
+        { error: "Utilisateur non authentifié." },
+        { status: 401 }
+      );
+    }
+
+    const userId = session.user.id;
+
+    // ----------------------------------------
+    // 2️⃣ Vérifier que c’est un apprenti
+    // ----------------------------------------
+    const user = await prisma.user.findUnique({
+      where: { id: userId },
+      include: { apprenti: true },
+    });
+
+    if (!user?.apprenti) {
+      return NextResponse.json(
+        { error: "Accès refusé : Réservé aux apprentis." },
+        { status: 403 }
+      );
+    }
+
+    const apprentiId = user.apprenti.id;
+
+    // ----------------------------------------
+    // 3️⃣ Récupérer les documents liés
+    // ----------------------------------------
+    const documents = await prisma.document.findMany({
+      where: {
+        OR: [
+          { journalSlotId: { not: null } },
+          { journalAssignmentId: { not: null } },
+        ],
+      },
+      include: {
+        slot: true,
+        assignment: true,
+      },
+      orderBy: { createdAt: "desc" },
+    });
+
+    return NextResponse.json({ documents });
+
+  } catch (error) {
+    console.error("GET documents error:", error);
+    return NextResponse.json(
+      { error: "Erreur serveur." },
+      { status: 500 }
+    );
+  }
+}
