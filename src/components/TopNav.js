@@ -31,11 +31,11 @@ export default function TopNav() {
             Accueil
           </Link>
           <Link
-            href="/journaux"
+            href="/journal"
             className={
               linkBase +
               " " +
-              (pathname.startsWith("/journaux") ? linkActive : linkInactive)
+              (pathname.startsWith("/journal") ? linkActive : linkInactive)
             }
           >
             Journaux

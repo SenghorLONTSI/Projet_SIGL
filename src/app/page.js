@@ -1,54 +1,212 @@
-import Image from "next/image";
-import { getUser, getSession } from "@/lib/auth-server";
-import { unauthorized } from "next/navigation";
-import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
+// src/app/page.js
+import { prisma } from "../lib/prisma";
+import { requireApprenti } from "../lib/auth";
+import Link from "next/link";
+import TopNav from "../components/TopNav";
 
-export default async function Home() {
-  const session = await getSession();
-  if (!session) {
-    return unauthorized();
+export const dynamic = "force-dynamic";
+
+function formatDate(d) {
+  if (!d) return "—";
+  try {
+    return new Intl.DateTimeFormat("fr-FR", {
+      dateStyle: "medium",
+      timeZone: "Europe/Paris",
+    }).format(d);
+  } catch {
+    return d.toString();
+  }
+}
+
+// Récupère les journaux de l'apprenti connecté
+async function getApprentiJournals(apprentiId) {
+  return prisma.journalAssignment.findMany({
+    where: { apprentiId },
+    include: {
+      template: true,
+    },
+    orderBy: { createdAt: "desc" },
+  });
+}
+
+export default async function HomePage() {
+  // 1) Vérifier que l'utilisateur est bien un apprenti connecté
+  let user;
+  try {
+    user = await requireApprenti();
+  } catch {
+    return (
+      <main className="min-h-screen flex items-center justify-center bg-gradient-to-b from-sky-50 via-sky-100 to-sky-50">
+        <div className="bg-white/90 rounded-3xl shadow-lg px-8 py-6 text-center space-y-3 border border-sky-100">
+          <h1 className="text-2xl font-semibold text-slate-900">Bienvenue</h1>
+          <p className="text-slate-600">
+            Vous devez être connecté en tant qu&apos;apprenti pour accéder à votre
+            espace.
+          </p>
+          <Link
+            href="/login"
+            className="inline-flex items-center gap-1 rounded-full bg-blue-600 text-white text-sm font-medium px-5 py-2.5 hover:bg-blue-700 transition shadow-sm"
+          >
+            Se connecter
+          </Link>
+        </div>
+      </main>
+    );
   }
 
-  const user = await getUser();
-  if (!user) {
-    return unauthorized();
-  }
+  // 2) Récupérer les journaux de cet apprenti
+  const assignments = await getApprentiJournals(user.id);
 
-  const roleMap = {
-    APPRENTI: "Apprenti",
-    MA: "Maître d'apprentissage",
-    USER: "Utilisateur",
-    TP: "Tuteur pédagogique",
-  };
+  const total = assignments.length;
+  const enCours = assignments.filter((a) => a.statut === "EN_COURS").length;
+  const enRetard = assignments.filter((a) => a.statut === "EN_RETARD").length;
+  const termines = assignments.filter((a) => a.statut === "TERMINE").length;
 
-  console.log("User role:", user.role);
-  const roleDisplay = roleMap[user.role] || user.role;
+  // Prochaine échéance (la plus proche parmi les deadlines)
+  const withDeadline = assignments
+    .filter((a) => a.template?.deadline)
+    .sort(
+      (a, b) =>
+        new Date(a.template.deadline) - new Date(b.template.deadline)
+    );
+  const nextDeadline = withDeadline[0] || null;
+
+  // Les 3 prochains journaux à rendre
+  const prochains = withDeadline.slice(0, 3);
 
   return (
-    <div className="max-w-sm mx-auto mt-10">
-      <span className="text-2xl font-bold mb-4">Bienvenue sur SIGL !</span>
-      <Card>
-        <CardHeader className="flex flex-col items-center">
-          <Image
-            src={user.image || "/default-image.png"}
-            alt="image utilisateur"
-            width={80}
-            height={80}
-            className="rounded-full mb-4"
-          />
-          <CardTitle>{user.name}</CardTitle>
-        </CardHeader>
-        <CardContent className="text-center space-y-4">
-          <div>
-            <span className="text-gray-800 font-medium">Adresse email</span>
-            <p className="text-gray-600">{user.email}</p>
+    <main className="min-h-screen bg-gradient-to-b from-sky-50 via-sky-100 to-sky-50">
+      <TopNav />
+
+      <div className="max-w-5xl mx-auto px-6 py-10 space-y-8">
+        {/* Header : bienvenue */}
+        <header className="space-y-2">
+          <h1 className="text-4xl font-extrabold tracking-tight text-slate-900">
+            Bonjour {user.firstName || ""} {user.lastName || ""}
+          </h1>
+          <p className="text-slate-700 text-sm sm:text-base">
+            Bienvenue sur votre espace apprenti. Retrouvez ici une synthèse de vos journaux.
+          </p>
+        </header>
+
+        {/* Cartes de synthèse */}
+        <section className="grid grid-cols-1 sm:grid-cols-4 gap-4">
+          <div className="bg-white/95 rounded-2xl shadow-sm border border-sky-300 p-4">
+            <div className="text-[11px] tracking-wide uppercase text-slate-500">
+              Tous mes journaux
+            </div>
+            <div className="mt-2 text-3xl font-bold text-slate-900">{total}</div>
           </div>
-          <div>
-            <span className="text-gray-800 font-medium">Rôle</span>
-            <p className="text-gray-500">{roleDisplay}</p>
+          <div className="bg-white/95 rounded-2xl shadow-sm border border-sky-400 p-4">
+            <div className="text-[11px] tracking-wide uppercase text-slate-500">
+              En cours
+            </div>
+            <div className="mt-2 text-3xl font-bold text-sky-700">{enCours}</div>
           </div>
-        </CardContent>
-      </Card>
-    </div>
+          <div className="bg-white/95 rounded-2xl shadow-sm border border-rose-300 p-4">
+            <div className="text-[11px] tracking-wide uppercase text-slate-500">
+              En retard
+            </div>
+            <div className="mt-2 text-3xl font-bold text-rose-600">{enRetard}</div>
+          </div>
+          <div className="bg-white/95 rounded-2xl shadow-sm border border-emerald-300 p-4">
+            <div className="text-[11px] tracking-wide uppercase text-slate-500">
+              Terminés
+            </div>
+            <div className="mt-2 text-3xl font-bold text-emerald-600">{termines}</div>
+          </div>
+        </section>
+
+        {/* Prochaine échéance */}
+        <section className="bg-white/95 rounded-3xl shadow-sm border border-sky-100 p-6 space-y-4">
+          <div className="flex items-center justify-between gap-2">
+            <h2 className="text-lg font-semibold text-slate-900">
+              Prochaine échéance
+            </h2>
+            <Link
+              href="/journaux"
+              className="text-sm text-blue-700 hover:underline font-medium"
+            >
+              Voir tous mes journaux →
+            </Link>
+          </div>
+
+          {!nextDeadline && (
+            <p className="text-sm text-slate-600">
+              Vous n&apos;avez pas encore de journal avec une date limite configurée.
+            </p>
+          )}
+
+          {nextDeadline && (
+            <div className="rounded-2xl border border-slate-200 bg-slate-50/80 px-5 py-4 space-y-1">
+              <div className="text-sm font-semibold text-slate-900">
+                {nextDeadline.template?.Titre ||
+                  nextDeadline.template?.code ||
+                  "Journal"}
+              </div>
+              <div className="text-xs text-slate-600">
+                À rendre pour le{" "}
+                <span className="font-medium">
+                  {formatDate(nextDeadline.template.deadline)}
+                </span>
+              </div>
+              <div className="text-xs text-slate-600">
+                Statut :{" "}
+                <span className="uppercase tracking-wide font-medium">
+                  {nextDeadline.statut.replace("_", " ")}
+                </span>
+              </div>
+            </div>
+          )}
+        </section>
+
+        {/* Prochains journaux à compléter */}
+        <section className="space-y-3">
+          <h2 className="text-lg font-semibold text-slate-900">
+            Mes prochains journaux
+          </h2>
+
+          {prochains.length === 0 && (
+            <p className="text-sm text-slate-600">
+              Aucun journal à venir pour le moment.
+            </p>
+          )}
+
+          {prochains.length > 0 && (
+            <div className="space-y-3">
+              {prochains.map((a) => (
+                <div
+                  key={a.id}
+                  className="bg-white/95 rounded-3xl shadow-sm border border-slate-200 px-5 py-4 flex items-center justify-between gap-4"
+                >
+                  <div className="space-y-1">
+                    <div className="text-sm font-semibold text-slate-900">
+                      {a.template?.Titre || a.template?.code || "Journal"}
+                    </div>
+                    <div className="text-xs text-slate-600">
+                      À rendre pour le{" "}
+                      <span className="font-medium">
+                        {formatDate(a.template?.deadline)}
+                      </span>
+                    </div>
+                    <div className="text-xs text-slate-600">
+                      Période : {a.template?.periode || "—"}
+                    </div>
+                  </div>
+
+                  <Link
+                    href={`/journaux/${a.id}`}
+                    className="inline-flex items-center gap-1 rounded-full bg-blue-600 text-white text-xs font-medium px-4 py-2.5 hover:bg-blue-700 transition shadow-sm"
+                  >
+                    Compléter
+                    <span aria-hidden>→</span>
+                  </Link>
+                </div>
+              ))}
+            </div>
+          )}
+        </section>
+      </div>
+    </main>
   );
 }

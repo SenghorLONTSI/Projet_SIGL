@@ -1,7 +1,7 @@
 // src/lib/auth.js
 import { betterAuth } from "better-auth";
 import { prismaAdapter } from "better-auth/adapters/prisma";
-import { prisma } from "./prisma"; // <- ../lib/prisma si ton fichier est ailleurs
+import { prisma } from "./prisma";      // <-- assure-toi que prisma.js est dans le même dossier
 import { headers } from "next/headers";
 
 // Instance Better Auth
@@ -15,7 +15,7 @@ export const auth = betterAuth({
         type: "string",
         required: false,
         defaultValue: "USER",
-        input: false, // l'utilisateur ne peut pas changer son rôle
+        input: false, // l'utilisateur ne peut pas changer son rôle lui-même
       },
     },
   },
@@ -26,10 +26,11 @@ export const auth = betterAuth({
 });
 
 /**
- * Récupère la session via Better Auth
- * et vérifie que l'utilisateur est un APPRENTI.
- * - lève une erreur si pas connecté ou mauvais rôle
- * - renvoie l'objet user (session.user) sinon
+ * requireApprenti
+ * - récupère la session via Better Auth
+ * - vérifie que l'utilisateur a bien le rôle "APPRENTI"
+ * - renvoie session.user (id, email, role, etc.)
+ * - lève une erreur si non connecté ou mauvais rôle
  */
 export async function requireApprenti() {
   const session = await auth.api.getSession({
@@ -40,11 +41,9 @@ export async function requireApprenti() {
     throw new Error("NOT_AUTHENTICATED");
   }
 
-  // on suppose que le rôle "APPRENTI" sera mis sur l'utilisateur
   if (session.user.role !== "APPRENTI") {
     throw new Error("NOT_APPRENTI");
   }
 
-  // ici tu peux juste renvoyer le user Better-Auth
   return session.user;
 }
