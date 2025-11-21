@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { FileUploadBox } from "@/components/upload/FileUploadBox";
 import { AlertCircle } from "lucide-react";
 
-export default function FicheSyntheseUploadPage() {
+export default function DocsComplementairesUploadPage() {
   const [session, setSession] = useState(null);
   const [loading, setLoading] = useState(true);
 
@@ -22,7 +22,7 @@ export default function FicheSyntheseUploadPage() {
     fetchSession();
   }, []);
 
-  // Loader
+  // Loader cohérent
   if (loading) {
     return (
       <div className="max-w-2xl mx-auto p-6 text-center text-gray-600">
@@ -53,17 +53,18 @@ export default function FicheSyntheseUploadPage() {
 
   return (
     <div className="max-w-2xl mx-auto p-6 space-y-6">
-      <h1 className="text-3xl font-bold">Déposer la Fiche de Synthèse</h1>
+      <h1 className="text-3xl font-bold">Documents Complémentaires</h1>
 
       <div className="p-4 border rounded-xl bg-gray-50 text-gray-700">
-        Téléversez ici votre fiche de synthèse complétée.  
-        Le format attendu est généralement <strong>PDF</strong>.
+        Déposez ici les documents annexes utiles à votre dossier.  
+        Vous pouvez ajouter plusieurs fichiers (PDF, images, annexes...).
       </div>
 
       <div className="border rounded-xl p-6 shadow-sm">
         <FileUploadBox
-          label="Upload de la Fiche de Synthèse"
-          journalSlotId={2} // Remplacer si nécessaire
+          label="Upload des Documents"
+          multiple={true}
+          journalSlotId={3} // Remplacer par l’ID approprié
         />
       </div>
     </div>

@@ -1,32 +1,39 @@
 "use client";
 
 import Link from "next/link";
+import { FileText, FilePlus2, FolderOpen } from "lucide-react";
 
 export default function UploadDashboard({ user }) {
   return (
-    <div className="max-w-2xl mx-auto p-6 space-y-4 border border-muted rounded-lg">
-      <h2 className="text-xl font-bold text-center">Vos uploads</h2>
+    <div className="max-w-2xl mx-auto p-8 space-y-6 border border-muted rounded-2xl shadow-sm bg-white">
+      <h2 className="text-2xl font-bold text-center">Espace de Dépôt</h2>
+      <p className="text-center text-gray-600">
+        Sélectionnez le type de document que vous souhaitez déposer.
+      </p>
 
-      <div className="space-y-2">
+      <div className="space-y-3">
         <Link
           href="/upload/rapport"
-          className="block text-center p-3 border rounded hover:bg-gray-100"
+          className="flex items-center gap-3 p-4 border rounded-xl hover:bg-gray-50 transition"
         >
-          Déposer le Rapport Final
+          <FileText className="w-5 h-5 text-gray-700" />
+          <span className="font-medium">Déposer le Rapport Final</span>
         </Link>
 
         <Link
           href="/upload/synthese"
-          className="block text-center p-3 border rounded hover:bg-gray-100"
+          className="flex items-center gap-3 p-4 border rounded-xl hover:bg-gray-50 transition"
         >
-          Déposer la Fiche de Synthèse
+          <FilePlus2 className="w-5 h-5 text-gray-700" />
+          <span className="font-medium">Déposer la Fiche de Synthèse</span>
         </Link>
 
         <Link
           href="/upload/complementaires"
-          className="block text-center p-3 border rounded hover:bg-gray-100"
+          className="flex items-center gap-3 p-4 border rounded-xl hover:bg-gray-50 transition"
         >
-          Déposer les Documents Complémentaires
+          <FolderOpen className="w-5 h-5 text-gray-700" />
+          <span className="font-medium">Déposer les Documents Complémentaires</span>
         </Link>
       </div>
     </div>

@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { FileUploadBox } from "@/components/upload/FileUploadBox";
+import { AlertCircle } from "lucide-react";
 
 export default function RapportUploadPage() {
   const [session, setSession] = useState(null);
@@ -21,30 +22,50 @@ export default function RapportUploadPage() {
     fetchSession();
   }, []);
 
-  if (loading) return <div className="p-6">Chargement...</div>;
-
-  if (!session) {
-    return <div className="p-6 text-red-600">
-      Vous devez être connecté pour accéder à cette page.
-    </div>;
+  // Loader plus propre
+  if (loading) {
+    return (
+      <div className="max-w-2xl mx-auto p-6 text-center text-gray-600">
+        Chargement...
+      </div>
+    );
   }
 
-  // Exemple : restreindre aux apprentis
+  // Message si non connecté
+  if (!session) {
+    return (
+      <div className="max-w-xl mx-auto p-6 flex items-center gap-3 text-red-600 border border-red-300 bg-red-50 rounded-lg">
+        <AlertCircle className="w-5 h-5" />
+        <span>Vous devez être connecté pour accéder à cette page.</span>
+      </div>
+    );
+  }
+
+  // Restriction de rôle
   if (session.role !== "APPRENTI") {
-    return <div className="p-6 text-red-600">
-      Accès réservé aux apprentis.
-    </div>;
+    return (
+      <div className="max-w-xl mx-auto p-6 flex items-center gap-3 text-red-600 border border-red-300 bg-red-50 rounded-lg">
+        <AlertCircle className="w-5 h-5" />
+        <span>Accès réservé aux apprentis.</span>
+      </div>
+    );
   }
 
   return (
     <div className="max-w-2xl mx-auto p-6 space-y-6">
-      <h1 className="text-2xl font-bold">Déposer votre Rapport</h1>
-      <p className="text-muted-foreground">Téléversez ici votre rapport final.</p>
+      <h1 className="text-3xl font-bold">Déposer votre Rapport Final</h1>
 
-      <FileUploadBox 
-        label="Upload du Rapport"
-        journalSlotId={1} // ID numérique réel du slot
-      />
+      <div className="p-4 border rounded-xl bg-gray-50 text-gray-700">
+        Assurez-vous de déposer la version définitive de votre rapport.  
+        Les formats acceptés sont généralement <strong>PDF</strong>.
+      </div>
+
+      <div className="border rounded-xl p-6 shadow-sm">
+        <FileUploadBox
+          label="Upload du Rapport"
+          journalSlotId={1} 
+        />
+      </div>
     </div>
   );
 }
