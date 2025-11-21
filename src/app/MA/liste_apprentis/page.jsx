@@ -2,6 +2,11 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { redirect } from "next/navigation";
+import { getSession } from "@/lib/auth-server";
+import { toast } from "sonner";
+import { useRouter } from "next/navigation";
 
 function getInitials(name = "", subName = "") {
   const parts = `${name} ${subName}`.trim().split(" ");
@@ -11,6 +16,11 @@ function getInitials(name = "", subName = "") {
     .map((p) => p[0]?.toUpperCase())
     .join("");
 }
+// const session = await getSession();
+// if (!session) {
+//   // toast.error("Vous devez être connecté pour accéder à cette page.");
+//   redirect("/login");
+// }
 
 export default function MesApprentisPage() {
   const [apprentis, setApprentis] = useState([]);
@@ -18,6 +28,7 @@ export default function MesApprentisPage() {
   const [error, setError] = useState(null);
   const [search, setSearch] = useState("");
   const [filterTP, setFilterTP] = useState("all"); // "all" | "with" | "without"
+  const router = useRouter();
 
   useEffect(() => {
     async function loadApprentis() {
@@ -277,6 +288,16 @@ export default function MesApprentisPage() {
                   )}
                 </div>
               </CardContent>
+
+              <div className="flex flex-row items-center justify-end px-4  pt-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => router.push(`/journal/ma/${a.id}`)}
+                >
+                  Accéder aux journaux
+                </Button>
+              </div>
             </Card>
           ))}
         </div>

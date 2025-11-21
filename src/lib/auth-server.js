@@ -1,4 +1,4 @@
-
+"use server";
 import { headers } from "next/headers";
 import { auth } from "../lib/auth";
 import { rolePermissions } from "./permissions";
@@ -20,15 +20,17 @@ export const getUser = async () => {
         return null;
     }
     return session?.user || null;
-}
 
+
+}
+//US-02-1 Mise en place du middleware requireRole
 /**
  * Vérifie si l'utilisateur de la session a la permission d'effectuer une action.
  * Lance une erreur `Response` (403 Forbidden) si l'autorisation est refusée.
  * @param {object} session - L'objet session de l'utilisateur.
  * @param {string} action - L'action à vérifier (ex: "journal:create").
  */
-export function requireRole(session, action) {
+export async function requireRole(session, action) {
     const role = session?.user?.role;
 
     if (!role) {
@@ -62,16 +64,38 @@ export function requireRole(session, action) {
  * @param {string} resourceId - L'ID de la ressource à vérifier.
  * @param {string} resourceType - Le type de ressource (ex: "journal").
  */
+
+
 export async function requireOwnership(session, resourceId, resourceType) {
     const userId = session.user.id;
     const ma = await prisma.ma.findUnique({
         where: { userId },
         select: { id: true }
     });
-    let resource;
 
+    /*
+        //US 02-2  Middleware requireOwnership() pour un Journal
+    */
+    // vérifier si l'apprenti est bien le propriétaire du journal
     if (resourceType === 'journal') {
-        resource = await prisma.journalAssignment.findUnique({ where: { id: resourceId } });
+        const assignmentId = typeof resourceId === "string" ? Number(resourceId) : resourceId;
+        if (!Number.isInteger(assignmentId)) {
+            throw new Response(JSON.stringify({ error: "id invalide" }), { status: 400, headers: { "Content-Type": "application/json" } });
+        }
+        journal = await prisma.journalAssignment.findUnique({
+            where: { id: assignmentId },
+            select: { apprentiId: true, userId: true },
+        });
+        if (!journal || journal.apprentiId !== userId) {
+            throw new Response(
+                JSON.stringify({
+                    error: "Interdit: vous n'êtes pas propriétaire de cette ressource.",
+                    detail: { userId, resourceId, resourceType },
+                }),
+                { status: 403, headers: { "Content-Type": "application/json" } }
+            );
+        }
+
     }
 
     // Vérifier si le MA est bien rattaché à l'apprenti du journal
@@ -100,13 +124,5 @@ export async function requireOwnership(session, resourceId, resourceType) {
     }
     // Ajoutez d'autres types de ressources ici si nécessaire
 
-    if (!resource || resource.apprentiId !== userId) {
-        throw new Response(
-            JSON.stringify({
-                error: "Forbidden: you are not the owner of this resource.",
-                detail: { userId, resourceId, resourceType },
-            }),
-            { status: 403, headers: { "Content-Type": "application/json" } }
-        );
-    }
+
 }

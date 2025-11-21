@@ -22,9 +22,13 @@ export function Navbar() {
     data: session,
     isPending: statusPending,
     error: statusError,
-  } = authClient.useSession();
+  } = authClient.useSession({
+    refetchOnWindowFocus: false,
+    refetchOnReconnect: false,
+    refetchInterval: false,
+    staleTime: 5 * 60 * 1000,
+  });
   const router = useRouter();
-  console.log(session, status);
 
   const handleSignOut = async () => {
     await authClient.signOut();

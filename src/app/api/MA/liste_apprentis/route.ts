@@ -1,26 +1,22 @@
+export const runtime = "nodejs";
+
+// src/app/api/MA/liste_apprentis/route.ts
 import { NextResponse } from "next/server";
 import { getSession, getUser, requireRole } from "@/lib/auth-server";
 import { prisma } from "@/lib/prisma";
 
 export async function GET() {
-  // Vérifier la session
   const session = await getSession();
   if (!session) {
-    return NextResponse.json(
-      { error: "Non authentifié" },
-      { status: 401 }
-    );
+    return NextResponse.json({ error: "Non authentifié" }, { status: 401 });
   }
 
   const user = await getUser();
   if (!user) {
-    return NextResponse.json(
-      { error: "Utilisateur introuvable" },
-      { status: 401 }
-    );
+    return NextResponse.json({ error: "Utilisateur introuvable" }, { status: 401 });
   }
 
-  // Récupérer le MA associé à l'utilisateur
+  // 1️⃣ On récupère le MA lié à ce user
   const ma = await prisma.ma.findUnique({
     where: { userId: user.id },
   });
@@ -35,11 +31,19 @@ export async function GET() {
     );
   }
 
-  // Récupérer les apprentis rattachés à ce MA
+  // 2️⃣ On récupère les apprentis liés à ce MA, avec leur TP + user du TP
   const apprentis = await prisma.apprenti.findMany({
     where: { idMA: ma.id },
-    include: { user: true },
+    include: {
+      user: true, // user de l'apprenti
+      tp: {
+        include: {
+          user: true, // user du TP (pour l'email)
+        },
+      },
+    },
   });
 
   return NextResponse.json({ apprentis });
 }
+

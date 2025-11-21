@@ -40,10 +40,6 @@ export async function POST(request) {
     return new Response(JSON.stringify(assignment, { message: "Journal créé" }), { status: 201, headers: { "Content-Type": "application/json" } });
 
 
-    return new Response(
-      JSON.stringify({ message: "Journal created (fake for now)" }),
-      { status: 201, headers: { "Content-Type": "application/json" } }
-    );
   } catch (err) {
     if (err instanceof Response) return err; // `authorize` renvoie déjà la bonne réponse
     console.error(err);

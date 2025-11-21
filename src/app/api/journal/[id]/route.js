@@ -3,7 +3,7 @@
 import { getSession, requireRole, requireOwnership } from "@/lib/auth-server";
 import { ACTIONS } from "@/lib/permissions";
 import { prisma } from "@/lib/prisma";
-
+import { use } from "react";
 /**
  * Mettre à jour un journal
  */
@@ -63,6 +63,31 @@ export async function DELETE(request, { params }) {
         await prisma.journal.delete({ where: { id: journalId } });
 
         return new Response(null, { status: 204 }); // 204 No Content
+    } catch (err) {
+        if (err instanceof Response) return err;
+        console.error(err);
+        return new Response(JSON.stringify({ error: "Internal Server Error" }), { status: 500 });
+    }
+}
+
+//Récuperer les journaux
+export async function GET(request, { params }) {
+    try {
+        const session = await getSession();
+        if (!session) {
+            return new Response(JSON.stringify({ error: "Unauthorized" }), { status: 401 });
+        }
+
+        const journalId = await (params).id;
+        const journal = await prisma.journalAssignment.findMany({
+            where: { apprentiId: journalId }
+        });
+
+        if (!journal) {
+            return new Response(JSON.stringify({ error: "Journal not found" }), { status: 404 });
+        }
+
+        return new Response(JSON.stringify(journal), { status: 200 });
     } catch (err) {
         if (err instanceof Response) return err;
         console.error(err);

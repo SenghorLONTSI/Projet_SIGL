@@ -3,6 +3,8 @@
  * Définit les rôles, les actions et les permissions associées.
  */
 
+
+
 /**
  * Énumération des rôles disponibles dans l'application.
  * L'utilisation d'un objet permet l'autocomplétion et évite les erreurs de frappe.
@@ -20,6 +22,11 @@ export const ROLES = {
  * Énumération des actions possibles sur les ressources de l'API.
  */
 export const ACTIONS = {
+    HOME_APPRENTI_VIEW: "home:apprenti:view",
+    HOME_MA_VIEW: "home:ma:view",
+    HOME_TP_VIEW: "home:tp:view",
+    HOME_CA_VIEW: "home:ca:view",
+    HOME_JURY_VIEW: "home:jury:view",
     JOURNAL_CREATE: "journal:create",
     JOURNAL_UPDATE: "journal:update",
     JOURNAL_DELETE: "journal:delete",
@@ -38,19 +45,27 @@ export const ACTIONS = {
  */
 export const rolePermissions = {
     [ROLES.APPRENTI]: [
+        ACTIONS.HOME_APPRENTI_VIEW,
         ACTIONS.JOURNAL_CREATE,
         ACTIONS.JOURNAL_UPDATE,
         ACTIONS.JOURNAL_DELETE,
     ],
     [ROLES.MA]: [
+        ACTIONS.HOME_MA_VIEW,
         ACTIONS.REVIEW_CREATE,
         ACTIONS.REVIEW_UPDATE,
         ACTIONS.REVIEW_COMMENT,
         ACTIONS.REVIEW_NOTE,
         ACTIONS.APPRENTI_ASS_VIEW
     ],
-    [ROLES.TP]: [],
-    [ROLES.CA]: [],
-    [ROLES.JURY]: [],
+    [ROLES.TP]: [
+        ACTIONS.HOME_TP_VIEW
+    ],
+    [ROLES.CA]: [
+        ACTIONS.HOME_CA_VIEW
+    ],
+    [ROLES.JURY]: [
+        ACTIONS.HOME_JURY_VIEW
+    ],
     [ROLES.USER]: [],
 };
