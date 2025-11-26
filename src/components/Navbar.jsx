@@ -29,10 +29,6 @@ export function Navbar() {
     staleTime: 5 * 60 * 1000,
   });
   const router = useRouter();
-<<<<<<< HEAD
-  console.log(session, statusPending);
-=======
->>>>>>> dev
 
   const handleSignOut = async () => {
     await authClient.signOut();
