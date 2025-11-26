@@ -82,7 +82,7 @@ export async function requireOwnership(session, resourceId, resourceType) {
         if (!Number.isInteger(assignmentId)) {
             throw new Response(JSON.stringify({ error: "id invalide" }), { status: 400, headers: { "Content-Type": "application/json" } });
         }
-        journal = await prisma.journalAssignment.findUnique({
+        const journal = await prisma.journalAssignment.findUnique({
             where: { id: assignmentId },
             select: { apprentiId: true, userId: true },
         });
