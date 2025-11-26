@@ -1,49 +1,47 @@
 // app/api/journals/route.js
 
-import { getSession, requireRole, Actions } from "@/lib/auth-server";
+import { getSession, requireRole } from "@/lib/auth-server";
+import { ACTIONS } from "@/lib/permissions";
+import { prisma } from "@/lib/prisma";
 
-export async function POST() {
-  // 1) Vérifier la session
-  const session = getSession();
-
-  // 2) À partir d'ici, tu es sûr d'avoir :
-  //    session.user.id, session.user.role, etc.
-  //    Tu pourras ajouter requireRole / requireOwnership ensuite.
-
-  return new Response(
-    JSON.stringify({
-      message: "OK, tu es authentifié",
-      userId: session.user.id,
-      role: session.user.role,
-    }),
-    { status: 200, headers: { "Content-Type": "application/json" } }
-  );
-}
-
-
-
-export async function POST() {
+export async function POST(request) {
   try {
     // 1) Auth obligatoire
-    const session = getSession();
+    const session = await getSession();
+    if (!session) {
+      return new Response(JSON.stringify({ error: "Unauthorized" }), { status: 401 });
+    }
 
     // 2) Vérifier que ce rôle a le droit de créer un journal
-    requireRole(session, Actions.JOURNAL_CREATE);
+    requireRole(session, ACTIONS.JOURNAL_CREATE);
 
     // 3) Ici tu es sûr :
     //    - user authentifié
     //    - role = APPRENTI (avec nos règles actuelles)
     //    - Prochaine étape : créer le journal avec apprenti_id = session.user.id
 
-    // TODO: insert into DB...
-    // await db.insertJournal({ apprentiId: session.user.id, ... })
+    // TODO: Insérer le journal dans la base de données...
 
-    return new Response(
-      JSON.stringify({ message: "Journal created (fake for now)" }),
-      { status: 201, headers: { "Content-Type": "application/json" } }
-    );
+    const body = await request.json().catch(() => ({}));
+    const templateId = body?.templateId;
+    if (typeof templateId !== "number") {
+      return new Response(JSON.stringify({ error: "templateId (number) is required" }), { status: 400, headers: { "Content-Type": "application/json" } });
+    }
+    const apprenti = await prisma.apprenti.findUnique({
+      where: { userId: session.user.id },
+      select: { id: true },
+    });
+    if (!apprenti) {
+      return new Response(JSON.stringify({ error: "Apprenti non trouvé pour cet utilisateur" }), { status: 404, headers: { "Content-Type": "application/json" } });
+    }
+    const assignment = await prisma.journalAssignment.create({
+      data: { templateId, apprentiId: apprenti.id },
+    });
+    return new Response(JSON.stringify(assignment, { message: "Journal créé" }), { status: 201, headers: { "Content-Type": "application/json" } });
+
+
   } catch (err) {
-    if (err instanceof Response) return err; // nos require* renvoient déjà la bonne réponse
+    if (err instanceof Response) return err; // `authorize` renvoie déjà la bonne réponse
     console.error(err);
     return new Response(JSON.stringify({ error: "Internal Server Error" }), {
       status: 500,

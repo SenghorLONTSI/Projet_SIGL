@@ -36,6 +36,7 @@ model User {
   apprenti      apprenti?
   ma            ma?
   tp            tp?
+  maReviews     Review[]  @relation("MAUserReviews")
 
   @@map("user")
 }
@@ -86,20 +87,21 @@ model Verification {
 }
 
 model apprenti {
-  id        String   @id
-  userId    String   @unique
-  name      String
-  subName   String?
-  idMA      String
-  idTP      String
-  createdAt DateTime @default(now())
-  updatedAt DateTime @default(now())
-  ma        ma?      @relation(fields: [idMA], references: [id])
-  tp        tp?      @relation(fields: [idTP], references: [id])
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  journalAssignments JournalAssignment[] 
-  journalSlots       JournalSlot[]       
+  id                 String              @id
+  userId             String              @unique
+  name               String
+  subName            String?
+  idMA               String?
+  idTP               String?
+  createdAt          DateTime            @default(now())
+  updatedAt          DateTime            @default(now())
+  ma                 ma?                 @relation(fields: [idMA], references: [id])
+  tp                 tp?                 @relation(fields: [idTP], references: [id])
+  user               User                @relation(fields: [userId], references: [id], onDelete: Cascade)
+  journalAssignments JournalAssignment[]
+  journalSlots       JournalSlot[]
 
+  @@index([idMA])
 }
 
 model ma {
@@ -155,16 +157,16 @@ enum DocStatus {
 }
 
 model JournalTemplate {
-  id          Int      @id @default(autoincrement())
-  code        String   @unique
+  id          Int                 @id @default(autoincrement())
+  code        String              @unique
   Titre       String
   periode     String
   description String?
   deadline    DateTime?
-  slot       JournalSlot?       @relation("TemplateSlots")
-  assignment JournalAssignment[]
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  slot        JournalSlot?        @relation("TemplateSlots")
+  assignment  JournalAssignment[]
+  createdAt   DateTime            @default(now())
+  updatedAt   DateTime            @updatedAt
 
   @@map("journal_template")
 }
@@ -181,32 +183,50 @@ model JournalAssignment {
   updatedAt DateTime        @updatedAt
 
   documents Document[]
+  reviews   Review[]   @relation("AssignmentReviews")
 
   @@map("journal_assignment")
 }
 
 model JournalSlot {
-  id              Int         @id @default(autoincrement())
-  journalTemplateId Int         @unique
-  apprentiId      String?
-  titre           String
-  instruction     String?
-  mimeAuthorized  String?
-  maxSize         Int?
-  dueAt           DateTime?
-  isrequired      Boolean     @default(true)
+  id                Int       @id @default(autoincrement())
+  journalTemplateId Int       @unique
+  apprentiId        String?
+  titre             String
+  instruction       String?
+  mimeAuthorized    String?
+  maxSize           Int?
+  dueAt             DateTime?
+  isrequired        Boolean   @default(true)
 
-  statut          SlotStatut  @default(PENDING)
+  statut           SlotStatut @default(PENDING)
   lastsubmissionAt DateTime?
-  nbFiles         Int         @default(0)
+  nbFiles          Int        @default(0)
 
-  template        JournalTemplate @relation("TemplateSlots", fields: [journalTemplateId], references: [id])
-  apprenti        apprenti?       @relation(fields: [apprentiId], references: [id])
-  createdAt       DateTime        @default(now())
-  updatedAt       DateTime        @updatedAt
+  template  JournalTemplate @relation("TemplateSlots", fields: [journalTemplateId], references: [id])
+  apprenti  apprenti?       @relation(fields: [apprentiId], references: [id])
+  createdAt DateTime        @default(now())
+  updatedAt DateTime        @updatedAt
 
-  documents      Document[]
+  documents Document[]
+
   @@map("journal_slot")
+}
+
+model Review {
+  id           Int               @id @default(autoincrement())
+  assignmentId Int               @unique
+  maId         String
+  note         Int?
+  commentaire  String?
+  createdAt    DateTime          @default(now())
+  updatedAt    DateTime          @updatedAt
+  assignment   JournalAssignment @relation("AssignmentReviews", fields: [assignmentId], references: [id], onDelete: Cascade)
+  ma           User              @relation("MAUserReviews", fields: [maId], references: [id], onDelete: Cascade)
+
+  @@index([assignmentId])
+  @@index([maId])
+  @@map("review")
 }
 
 model Document {
