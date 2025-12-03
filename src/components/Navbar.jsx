@@ -35,6 +35,10 @@ export function Navbar() {
     router.push("/login");
   };
 
+  const handleGoProfile = () => {
+    router.push("/profil"); // <- nouvelle page profil
+  };
+
   const user = session?.user;
 
   return (
@@ -58,7 +62,7 @@ export function Navbar() {
                 <Link href="/login">Se connecter</Link>
               </Button>
               <Button asChild>
-                <Link href="/signup">S'inscrire</Link>
+                <Link href="/signup">S&apos;inscrire</Link>
               </Button>
             </>
           )}
@@ -70,7 +74,7 @@ export function Navbar() {
                   variant="ghost"
                   className="relative h-10 w-10 rounded-full"
                 >
-                  <Avatar className="h-10 w-10 p-">
+                  <Avatar className="h-10 w-10">
                     <AvatarImage src={user.image || ""} alt={user.name || ""} />
                     <AvatarFallback>
                       {user.name ? user.name.charAt(0).toUpperCase() : "U"}
@@ -89,9 +93,17 @@ export function Navbar() {
                     </p>
                   </div>
                 </DropdownMenuLabel>
+
+                <DropdownMenuSeparator />
+
+                {/* lien vers la page Profil */}
+                <DropdownMenuItem onClick={handleGoProfile} className="text-blue-600 font-medium hover:bg-blue-50 hover:text-blue-700">
+                  Mon profil
+                </DropdownMenuItem>
+
                 <DropdownMenuSeparator />
                 <DropdownMenuItem
-                  className="hover:bg-red-50"
+                  className="text-black-600 font-medium hover:bg-red-100 hover:text-red-800"
                   onClick={handleSignOut}
                 >
                   Se déconnecter
