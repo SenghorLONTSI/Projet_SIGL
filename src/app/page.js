@@ -39,6 +39,13 @@ export default async function HomePage() {
   if (!user) redirect("/login");
 
   // ——————————————————————————————————————————
+  // 📌 0) ESPACE TP → redirection automatique
+  // ——————————————————————————————————————————
+  if (session.user.role === "TP") {
+    return redirect("/TP/Accueil");
+  }
+
+  // ——————————————————————————————————————————
   // 📌 1) ESPACE APPRENTI
   // ——————————————————————————————————————————
   if (session.user.role === "APPRENTI") {
