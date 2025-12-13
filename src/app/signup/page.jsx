@@ -26,6 +26,7 @@ import { Button } from "@/components/ui/button";
 import { Toaster, toast } from "sonner";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
+import { fonts } from "../font";
 
 const pageSignUp = () => {
   const formSchema = z.object({
@@ -103,7 +104,7 @@ const pageSignUp = () => {
   //quand on clique sur le bouton, on appelle handleSubmit
   //affiche data et error dans la console
   return (
-    <div className="flex items-center justify-center h-screen">
+    <div className="flex items-center max-h-screen justify-center h-screen">
       <Toaster
         richColors={true}
         swipeDirections={"bottom"}
@@ -112,87 +113,115 @@ const pageSignUp = () => {
         theme="system"
         mobileOffset={{ bottom: "16px" }}
       />
-      <Card className="w-full max-w-md mx-auto my-20">
-        <CardHeader>
-          <CardTitle>Crée ton compte</CardTitle>
-          <CardDescription>
-            Veuillez remplir les informations ci-dessous
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
-              <FormField
-                control={form.control}
-                name="name"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Nom</FormLabel>
-                    <FormControl>
-                      <Input type="text" placeholder="Atango" {...field} />
-                    </FormControl>
-                    {/* <FormDescription>
+
+      <div className="grid grid-cols-2 w-full -mb-px max-h-screen scrollbar-hide">
+        <div className="hidden min-h-screen w-full md:block md:-mx-4 md:-right-16 bg-gradient-to-r rounded-r-xl from-[#2a176e] via-[#422c9f] to-[#6a51de] overflow-hidden"></div>
+
+        <div className="w-full col-start-2 ">
+          <div className="flex flex-col justify-center min-h-screen px-4">
+            <h1
+              className={`text-xl text-center font-weight-900 font-extrabold m-4 text-[#1f1b4a] lg:text-3xl ${fonts.className}`}
+            >
+              Page de connexion
+            </h1>
+            <Card
+              className={`w-full max-w-md mx-auto my-20 ${fonts.className}`}
+            >
+              <CardHeader>
+                <CardTitle>Crée ton compte</CardTitle>
+                <CardDescription>
+                  Veuillez remplir les informations ci-dessous
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <Form {...form}>
+                  <form
+                    onSubmit={form.handleSubmit(onSubmit)}
+                    className="space-y-8"
+                  >
+                    <FormField
+                      control={form.control}
+                      name="name"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Nom</FormLabel>
+                          <FormControl>
+                            <Input
+                              type="text"
+                              placeholder="Atango"
+                              {...field}
+                            />
+                          </FormControl>
+                          {/* <FormDescription>
                     This is your public display name.
                   </FormDescription> */}
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="password"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Mot de passe</FormLabel>
-                    <FormControl>
-                      <Input
-                        type="password"
-                        placeholder="********"
-                        {...field}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="email"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Adresse email</FormLabel>
-                    <FormControl>
-                      <Input
-                        type="email"
-                        placeholder="atanjunior@mail.com"
-                        {...field}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <div className="flex flex-col gap-2">
-                <Button
-                  className=" relative "
-                  type="submit"
-                  disabled={!loading}
-                >
-                  Crée ton compte
-                </Button>
-              </div>
-            </form>
-          </Form>
-        </CardContent>
-        <CardFooter className="flex flex-col space-y-2">
-          <p className="text-sm text-muted-foreground text-center font-light">
-            Tu as déjà un compte ?{" "}
-            <a href="/login" className="text-blue-500 hover:underline">
-              Connecte-toi
-            </a>
-          </p>
-        </CardFooter>
-      </Card>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={form.control}
+                      name="password"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Mot de passe</FormLabel>
+                          <FormControl>
+                            <Input
+                              type="password"
+                              placeholder="********"
+                              {...field}
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={form.control}
+                      name="email"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Adresse email</FormLabel>
+                          <FormControl>
+                            <Input
+                              type="email"
+                              placeholder="atanjunior@mail.com"
+                              {...field}
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <div className="flex flex-col gap-2">
+                      <Button
+                        className=" relative "
+                        type="submit"
+                        disabled={!loading}
+                      >
+                        Crée ton compte
+                      </Button>
+                    </div>
+                  </form>
+                </Form>
+              </CardContent>
+              <CardFooter className="flex flex-col space-y-2">
+                <p className="text-sm text-muted-foreground text-center font-light">
+                  Tu as déjà un compte ?{" "}
+                  <a href="/login" className="text-blue-500 hover:underline">
+                    Connecte-toi
+                  </a>
+                </p>
+              </CardFooter>
+            </Card>
+            <span
+              className={`text-sm text-center text-gray-500 ${fonts.className}`}
+            >
+              © Projet SIGLE. Fait par le groupe 3.
+            </span>
+          </div>
+        </div>
+      </div>
     </div>
   );
 };

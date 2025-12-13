@@ -30,7 +30,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { Mail, Phone, Search } from "lucide-react";
-import { fonts } from "./layout";
+import { fonts } from "./font";
 
 export const dynamic = "force-dynamic";
 
@@ -320,13 +320,13 @@ export default async function HomePage() {
 
             <div className="lg:col-span-3 space-y-8">
               <div className="flex items-center justify-between gap-4">
-                <h1 className={`text-3xl font-weight-900 font-extrabold text-[#1f1b4a] ${fonts.className}`}>Page d'accueil</h1>
+                <h1 className={`text-xl font-weight-900 font-extrabold text-[#1f1b4a] lg:text-3xl ${fonts.className}`}>Page d'accueil</h1>
                 <div className="flex items-center gap-3">
-                  <div className="relative w-72">
+                  <div className="relative w-30 lg:w-72">
                     <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
                     <Input
-                      placeholder="Search here..."
-                      className="pl-10 rounded-full bg-white border-slate-200 shadow-sm"
+                      placeholder="Chercher ici..."
+                      className="text-xs pl-10 rounded-full bg-white border-slate-200 shadow-sm"
                     />
                   </div>
 
@@ -522,8 +522,8 @@ export default async function HomePage() {
                     ))}
                   </CardContent>
                 </Card>
-                <div className="grid grid-cols-1 space-y-5 lg:space-y-0  lg:grid-rows-2 ">
-                  <Card className=" rounded-none col-span-1 shadow-none border-none px-2 bg-white">
+                <div className="grid grid-cols-1 lg:space-y-0  lg:grid-rows-2 gap-5">
+                  <Card className=" rounded-none col-span-1 shadow-none border-none px-2 bg-white lg:row-span-1">
                     <CardHeader className="pb-2">
                       <CardTitle className="text-base text-[#1f1b4a]">Ecoles rattachées</CardTitle>
                     </CardHeader>
@@ -539,7 +539,7 @@ export default async function HomePage() {
                     </CardContent>
                   </Card>
 
-                  <Card className="rounded-none col-start-2 shadow-none border-none bg-white">
+                  <Card className="rounded-none  col-span-1 sm:col-start-2 shadow-none border-none bg-white lg:row-start-2">
                     <CardHeader className="pb-2">
                       <CardTitle className="text-base text-[#1f1b4a]">Entreprises rattachées</CardTitle>
                     </CardHeader>

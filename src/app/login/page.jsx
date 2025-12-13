@@ -24,6 +24,7 @@ import { Button } from "@/components/ui/button";
 import { Toaster, toast } from "sonner";
 import { useRouter } from "next/navigation";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { fonts } from "../font";
 import { z } from "zod";
 
 const pageSignIn = () => {
@@ -91,71 +92,94 @@ const pageSignIn = () => {
         theme="system"
         mobileOffset={{ bottom: "16px" }}
       />
-      <Card className="w-full max-w-md mx-auto my-20">
-        <CardHeader>
-          <CardTitle>Connecte toi à ton compte</CardTitle>
-          <CardDescription>
-            Veuillez remplir les informations ci-dessous
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
-              <FormField
-                control={form.control}
-                name="email"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Adresse email</FormLabel>
-                    <FormControl>
-                      <Input
-                        type="email"
-                        placeholder="atanjunior@mail.com"
-                        {...field}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="password"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Mot de passe</FormLabel>
-                    <FormControl>
-                      <Input
-                        type="password"
-                        placeholder="********"
-                        {...field}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <div className="flex flex-col gap-2">
-                <Button
-                  className=" relative "
-                  type="submit"
-                  disabled={!loading}
-                >
-                  Se connecter
-                </Button>
-              </div>
-            </form>
-          </Form>
-        </CardContent>
-        <CardFooter className="flex flex-col space-y-2">
-          <p className="text-sm text-muted-foreground text-center font-light">
-            Tu n'as pas de compte ?{" "}
-            <a href="/signup" className="text-blue-500 hover:underline">
-              Inscris-toi
-            </a>
-          </p>
-        </CardFooter>
-      </Card>
+      <div className="grid grid-cols-2 w-full">
+        <div className="hidden min-h-screen w-full md:block md:-mx-4 md:-right-16 bg-gradient-to-r rounded-r-xl from-[#2a176e] via-[#422c9f] to-[#6a51de] overflow-hidden"></div>
+
+        <div className="w-full col-start-2 ">
+          <div className="flex flex-col justify-center min-h-screen px-4">
+            <h1
+              className={`text-xl text-center font-weight-900 font-extrabold m-4 text-[#1f1b4a] lg:text-3xl ${fonts.className}`}
+            >
+              Page de connexion
+            </h1>
+            <Card
+              className={`w-full h-fit max-w-md mx-auto my-20 ${fonts.className}`}
+            >
+              <CardHeader>
+                <CardTitle>Connecte toi à ton compte</CardTitle>
+                <CardDescription>
+                  Veuillez remplir les informations ci-dessous
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <Form {...form}>
+                  <form
+                    onSubmit={form.handleSubmit(onSubmit)}
+                    className="space-y-8"
+                  >
+                    <FormField
+                      control={form.control}
+                      name="email"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Adresse email</FormLabel>
+                          <FormControl>
+                            <Input
+                              type="email"
+                              placeholder="atanjunior@mail.com"
+                              {...field}
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={form.control}
+                      name="password"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Mot de passe</FormLabel>
+                          <FormControl>
+                            <Input
+                              type="password"
+                              placeholder="********"
+                              {...field}
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <div className="flex flex-col gap-2">
+                      <Button
+                        className=" relative "
+                        type="submit"
+                        disabled={!loading}
+                      >
+                        Se connecter
+                      </Button>
+                    </div>
+                  </form>
+                </Form>
+              </CardContent>
+              <CardFooter className="flex flex-col space-y-2">
+                <p className="text-sm text-muted-foreground text-center font-light">
+                  Tu n'as pas de compte ?{" "}
+                  <a href="/signup" className="text-blue-500 hover:underline">
+                    Inscris-toi
+                  </a>
+                </p>
+              </CardFooter>
+            </Card>
+            <span
+              className={`text-sm text-center text-gray-500 ${fonts.className}`}
+            >
+              © Projet SIGLE. Fait par le groupe 3.
+            </span>
+          </div>
+        </div>
+      </div>
     </div>
   );
 };
