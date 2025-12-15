@@ -16,6 +16,7 @@
 //   }
 // =======
 // src/app/page.js
+
 import { prisma } from "../lib/prisma";
 import { requireApprenti } from "../lib/auth";
 import { getUser, getSession, requireRole } from "@/lib/auth-server";
@@ -31,7 +32,7 @@ import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { Mail, Phone, Search } from "lucide-react";
 import { fonts } from "./font";
-
+import DropdownMenuUser from "@/components/DropdownMenuUser";
 export const dynamic = "force-dynamic";
 
 function formatDate(d) {
@@ -115,7 +116,7 @@ export default async function HomePage() {
     return (
 
       <main className="min-h-screen bg-gradient-to-b from-sky-50 via-sky-100 to-sky-50">
-        <TopNav />
+        {/* <TopNav /> */}
 
         <div className="max-w-5xl mx-auto px-6 py-10 space-y-8">
           {/* Header : bienvenue */}
@@ -255,7 +256,7 @@ export default async function HomePage() {
     requireRole(session, "home:ma:view");
     return (
       <main className="min-h-screen bg-gradient-to-b from-sky-50 via-sky-100 to-sky-50">
-        <TopNav />
+        {/* <TopNav /> */}
         <div className="max-w-5xl mx-auto px-6 py-10 space-y-8">
           <header className="space-y-2">
             <h1 className="text-4xl font-extrabold tracking-tight text-slate-900">
@@ -312,7 +313,7 @@ export default async function HomePage() {
 
     return (
       <main className="min-h-fit  bg-[#F3F4FF] text-slate-900">
-        <TopNav />
+        {/* <TopNav /> */}
 
         <div className=" w-full px-6 py-8 space-y-6">
 
@@ -326,7 +327,7 @@ export default async function HomePage() {
                     <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
                     <Input
                       placeholder="Chercher ici..."
-                      className="text-xs pl-10 rounded-full bg-white border-slate-200 shadow-sm"
+                      className="text-sm/10 pl-10 rounded-full bg-white border-slate-200 shadow-sm"
                     />
                   </div>
 
@@ -335,9 +336,10 @@ export default async function HomePage() {
                       <p className="text-sm font-semibold text-[#1f1b4a]">{session?.user?.name}</p>
                       <p className="text-xs uppercase tracking-wide text-slate-500">{session?.user?.role}</p>
                     </div>
-                    <Avatar className="h-10 w-10">
+                    {/* <Avatar className="h-10 w-10">
                       <AvatarFallback className="bg-[#c8bdf7] text-[#1f1b4a]">NA</AvatarFallback>
-                    </Avatar>
+                    </Avatar> */}
+                    <DropdownMenuUser name={user.name} email={user.email} />
                   </div>
 
                 </div>
@@ -346,34 +348,34 @@ export default async function HomePage() {
               <Card className="overflow-hidden border-none shadow-md rounded-3xl pt-0 bg-white">
                 <div className="relative h-32 bg-gradient-to-r rounded-t-3xl from-[#2a176e] via-[#422c9f] to-[#6a51de] overflow-hidden">
                   {/* from-[#2a176e] via-[#4b27a8] to-[#ffb32c] */}
-                  <div className="absolute right-32 bottom-[-28px] h-24 w-24 rounded-full z-20 bg-[#ffb32c]" />
-                  <div className="absolute right-45 bottom-[-35px] h-20 w-20 rounded-full z-10 bg-[#f05d7f]" />
+                  <div className="absolute left-50 md:right-32 bottom-[-28px] h-24 w-24 rounded-full z-20 bg-[#ffb32c]" />
+                  <div className="absolute left-45 md:right-45 bottom-[-35px] h-20 w-20 rounded-full z-10 bg-[#f05d7f]" />
                 </div>
                 <CardContent className="flex flex-wrap items-center gap-6 px-6 pb-6">
                   <Avatar className="h-20 w-20 border-4 border-white -mt-12 shadow-md">
                     <AvatarFallback className="bg-[#c8bdf7] text-[#1f1b4a] text-xl">NA</AvatarFallback>
                   </Avatar>
-                  <div className="space-y-1">
+                  <div className="space-y-1 p-b-4">
                     <p className="text-xl font-bold text-[#1f1b4a]">{session?.user?.name}</p>
                     <p className="text-sm text-slate-500">{session?.user?.role}</p>
                   </div>
-                  <div className="ml-auto grid grid-cols-2 gap-x-10 gap-y-3 text-sm">
+                  <div className="ml-auto grid grid-cols-2 gap-x-1 gap-y-3 text-sm">
                     <div className="flex items-center gap-3">
-                      <span className="h-9 w-9 rounded-full bg-[#ffe7dd] flex items-center justify-center text-[#ff7c4c]">
-                        <Phone className="h-4 w-4" />
+                      <span className="w-5 h-5 md:h-9 md:w-9 rounded-full bg-[#ffe7dd] flex items-center justify-center text-[#ff7c4c]">
+                        <Phone className="h-2 w-2 md:h-4 md:w-4" />
                       </span>
                       <div>
-                        <p className="text-xs text-slate-500">Phone</p>
+                        <p className="text-xs text-slate-500">Téléphone</p>
                         <p className="font-semibold">test</p>
                       </div>
                     </div>
                     <div className="flex items-center gap-3">
-                      <span className="h-9 w-9 rounded-full bg-[#ffe7dd] flex items-center justify-center text-[#ff7c4c]">
-                        <Mail className="h-4 w-4" />
+                      <span className="w-5 h-5 md:h-9 md:w-9 rounded-full bg-[#ffe7dd] flex items-center justify-center text-[#ff7c4c]">
+                        <Mail className="h-2 w-2 md:h-4 md:w-4" />
                       </span>
                       <div>
                         <p className="text-xs text-slate-500">Email</p>
-                        <p className="font-semibold">{session?.user?.email}</p>
+                        <p className="font-semibold text-sm">{session?.user?.email}</p>
                       </div>
                     </div>
                   </div>

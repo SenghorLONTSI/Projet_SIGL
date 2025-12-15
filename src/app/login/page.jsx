@@ -92,18 +92,19 @@ const pageSignIn = () => {
         theme="system"
         mobileOffset={{ bottom: "16px" }}
       />
-      <div className="grid grid-cols-2 w-full">
+      <div className="flex md:grid md:grid-cols-2 w-full">
         <div className="hidden min-h-screen w-full md:block md:-mx-4 md:-right-16 bg-gradient-to-r rounded-r-xl from-[#2a176e] via-[#422c9f] to-[#6a51de] overflow-hidden"></div>
 
         <div className="w-full col-start-2 ">
-          <div className="flex flex-col justify-center min-h-screen px-4">
+          <div className="grid grid-row min-h-screen px-4">
             <h1
-              className={`text-xl text-center font-weight-900 font-extrabold m-4 text-[#1f1b4a] lg:text-3xl ${fonts.className}`}
+              className={`text-xl text-center md:text-left font-weight-900 font-extrabold m-8 text-[#1f1b4a] lg:text-3xl ${fonts.className}`}
             >
-              Page de connexion
+              Page de Connexion
             </h1>
+            <div className="flex flex-col justify-center align-center">
             <Card
-              className={`w-full h-fit max-w-md mx-auto my-20 ${fonts.className}`}
+              className={`w-full h-fit max-w-md mx-auto my-20${fonts.className}`}
             >
               <CardHeader>
                 <CardTitle>Connecte toi à ton compte</CardTitle>
@@ -153,7 +154,7 @@ const pageSignIn = () => {
                     />
                     <div className="flex flex-col gap-2">
                       <Button
-                        className=" relative "
+                        className=" relative bg-[#2a176e] hover:bg-[#422c9f] focus:ring-4 focus:ring-blue-300 text-white w-full"
                         type="submit"
                         disabled={!loading}
                       >
@@ -172,8 +173,9 @@ const pageSignIn = () => {
                 </p>
               </CardFooter>
             </Card>
+            </div>
             <span
-              className={`text-sm text-center text-gray-500 ${fonts.className}`}
+              className={`text-sm text-center align-bottom flex flex-col p-4 justify-end text-gray-500 ${fonts.className}`}
             >
               © Projet SIGLE. Fait par le groupe 3.
             </span>
