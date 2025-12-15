@@ -20,23 +20,20 @@ model Post {
 
 model User {
   id            String    @id
-  email         String    @unique
   name          String
   subName       String?
+  email         String    @unique
   emailVerified Boolean
   image         String?
+  role          Role      @default(USER)
   createdAt     DateTime
   updatedAt     DateTime
-  role          Role      @default(USER)
-   // 👉 Ajouter pour avoir userId dans le model document
-  //documents Document[]
-  //
   accounts      Account[]
-  sessions      Session[]
   apprenti      apprenti?
   ma            ma?
-  tp            tp?
   maReviews     Review[]  @relation("MAUserReviews")
+  sessions      Session[]
+  tp            tp?
 
   @@map("user")
 }
@@ -44,7 +41,7 @@ model User {
 model Session {
   id        String   @id
   expiresAt DateTime
-  token     String
+  token     String   @unique
   createdAt DateTime
   updatedAt DateTime
   ipAddress String?
@@ -52,14 +49,13 @@ model Session {
   userId    String
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  @@unique([token])
   @@map("session")
 }
 
 model Account {
   id                    String    @id
-  accountId             String
   providerId            String
+  userId                String
   accessToken           String?
   refreshToken          String?
   idToken               String?
@@ -69,7 +65,7 @@ model Account {
   password              String?
   createdAt             DateTime
   updatedAt             DateTime
-  userId                String
+  accountId             String
   user                  User      @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@map("account")
@@ -126,36 +122,6 @@ model tp {
   user      User       @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
-enum Role {
-  USER
-  ADMIN
-  APPRENTI
-  MA
-  TP
-  CA
-  RH
-}
-
-enum SlotStatut {
-  PENDING
-  SUBMITTED
-  VALIDATED
-  REJECTED
-}
-
-enum AssignmentStatut {
-  EN_COURS
-  TERMINE
-  EN_RETARD
-}
-
-enum DocStatus {
-  UPLOADED
-  SUBMITTED
-  APPROVED
-  REJECTED
-}
-
 model JournalTemplate {
   id          Int                 @id @default(autoincrement())
   code        String              @unique
@@ -163,10 +129,10 @@ model JournalTemplate {
   periode     String
   description String?
   deadline    DateTime?
-  slot        JournalSlot?        @relation("TemplateSlots")
-  assignment  JournalAssignment[]
   createdAt   DateTime            @default(now())
   updatedAt   DateTime            @updatedAt
+  assignment  JournalAssignment[]
+  slot        JournalSlot?        @relation("TemplateSlots")
 
   @@map("journal_template")
 }
@@ -176,39 +142,36 @@ model JournalAssignment {
   templateId Int
   apprentiId String
   statut     AssignmentStatut @default(EN_COURS)
-
-  template  JournalTemplate @relation(fields: [templateId], references: [id])
-  apprenti  apprenti        @relation(fields: [apprentiId], references: [id])
-  createdAt DateTime        @default(now())
-  updatedAt DateTime        @updatedAt
-
-  documents Document[]
-  reviews   Review[]   @relation("AssignmentReviews")
+  createdAt  DateTime         @default(now())
+  updatedAt  DateTime         @updatedAt
+  //depositStart DateTime? // début autorisé ajouté par moi
+  //depositEnd   DateTime? // fin autorisée ajouté par moi
+  documents  Document[]
+  apprenti   apprenti         @relation(fields: [apprentiId], references: [id])
+  template   JournalTemplate  @relation(fields: [templateId], references: [id])
+  reviews    Review?          @relation("AssignmentReviews")
 
   @@map("journal_assignment")
 }
 
 model JournalSlot {
-  id                Int       @id @default(autoincrement())
-  journalTemplateId Int       @unique
+  id                Int             @id @default(autoincrement())
+  journalTemplateId Int             @unique
   apprentiId        String?
   titre             String
   instruction       String?
   mimeAuthorized    String?
   maxSize           Int?
   dueAt             DateTime?
-  isrequired        Boolean   @default(true)
-
-  statut           SlotStatut @default(PENDING)
-  lastsubmissionAt DateTime?
-  nbFiles          Int        @default(0)
-
-  template  JournalTemplate @relation("TemplateSlots", fields: [journalTemplateId], references: [id])
-  apprenti  apprenti?       @relation(fields: [apprentiId], references: [id])
-  createdAt DateTime        @default(now())
-  updatedAt DateTime        @updatedAt
-
-  documents Document[]
+  isrequired        Boolean         @default(true)
+  statut            SlotStatut      @default(PENDING)
+  lastsubmissionAt  DateTime?
+  nbFiles           Int             @default(0)
+  createdAt         DateTime        @default(now())
+  updatedAt         DateTime        @updatedAt
+  documents         Document[]
+  apprenti          apprenti?       @relation(fields: [apprentiId], references: [id])
+  template          JournalTemplate @relation("TemplateSlots", fields: [journalTemplateId], references: [id])
 
   @@map("journal_slot")
 }
@@ -230,26 +193,47 @@ model Review {
 }
 
 model Document {
-  id Int @id @default(autoincrement())
-
-  // lier EITHER à un slot, OR directement à l’affectation (journal sans slots)
+  id                  Int                @id @default(autoincrement())
   journalSlotId       Int?
   journalAssignmentId Int?
-
-  slot       JournalSlot?       @relation(fields: [journalSlotId], references: [id], onDelete: Cascade)
-  assignment JournalAssignment? @relation(fields: [journalAssignmentId], references: [id], onDelete: Cascade)
-
-  fileName String
-  mimeType String
-  size     Int
-  url      String
-
-  status    DocStatus @default(UPLOADED)
-  createdAt DateTime  @default(now())
-
-  // 1️⃣ RELATION AVEC L'UTILISATEUR que j'ai ajoutée
-  //userId String
-  //user   User @relation(fields: [userId], references: [id])
+  fileName            String
+  mimeType            String
+  size                Int
+  url                 String
+  status              DocStatus          @default(UPLOADED)
+  createdAt           DateTime           @default(now())
+  assignment          JournalAssignment? @relation(fields: [journalAssignmentId], references: [id], onDelete: Cascade)
+  slot                JournalSlot?       @relation(fields: [journalSlotId], references: [id], onDelete: Cascade)
 
   @@map("document")
+}
+
+enum Role {
+  APPRENTI
+  MA
+  TP
+  RH
+  USER
+  ADMIN
+  CA
+}
+
+enum SlotStatut {
+  PENDING
+  SUBMITTED
+  VALIDATED
+  REJECTED
+}
+
+enum AssignmentStatut {
+  EN_COURS
+  TERMINE
+  EN_RETARD
+}
+
+enum DocStatus {
+  UPLOADED
+  SUBMITTED
+  APPROVED
+  REJECTED
 }
