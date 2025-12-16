@@ -15,30 +15,27 @@ const DropdownMenuUser = (props) => {
               <DropdownMenuTrigger asChild>
                 <Button
                   variant="ghost"
-                  className="relative h-10 w-10 bg-[#c8bdf7] rounded-full"
+                  className="relative h-10 w-10 shrink-0 bg-[#c8bdf7] rounded-full"
                 >
-                  <Avatar className="h-10 w-10  text-[#1f1b4a]">
-                    <AvatarImage src={props.image || ""} alt={props.name || ""} />
+                  <Avatar className="h-10 w-10 text-[#1f1b4a]">
                     <AvatarFallback>
-                      {props.name ? props.name.charAt(0).toUpperCase() : "Uf"}
+                      {props.name ? props.name.charAt(0).toUpperCase() : "U"}
                     </AvatarFallback>
                   </Avatar>
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent className="w-56" align="end" forceMount>
-                <DropdownMenuLabel className="font-normal">
-                  <div className="flex flex-col space-y-1">
-                    <p className="text-sm font-medium leading-none">
-                      {props.name}
-                    </p>
-                    <p className="text-xs leading-none text-muted-foreground">
-                      {props.email}
-                    </p>
-                  </div>
+                <DropdownMenuLabel className="font-xl font-bold text-[#1f1b4a]">
+                 Compte principal
                 </DropdownMenuLabel>
-                <DropdownMenuSeparator />
                 <DropdownMenuItem
                   className="hover:bg-red-50"
+                >
+                  Mon espace
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem
+                  className="hover:bg-red-50 text-red-600"
                 >
                   Se déconnecter
                 </DropdownMenuItem>

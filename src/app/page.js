@@ -18,6 +18,8 @@
 // src/app/page.js
 
 import { prisma } from "../lib/prisma";
+import React, { useEffect, useMemo } from "react";
+import { useState } from "react";
 import { requireApprenti } from "../lib/auth";
 import { getUser, getSession, requireRole } from "@/lib/auth-server";
 import { redirect } from "next/navigation";
@@ -30,9 +32,10 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
-import { Mail, Phone, Search } from "lucide-react";
+import { Mail, Phone, Search, ArrowRight } from "lucide-react";
 import { fonts } from "./font";
 import DropdownMenuUser from "@/components/DropdownMenuUser";
+import { get } from "react-hook-form";
 export const dynamic = "force-dynamic";
 
 function formatDate(d) {
@@ -286,6 +289,38 @@ export default async function HomePage() {
   if (session?.user?.role === "CA") {
     requireRole(session, "home:ca:view");
 
+    //recuper tous les utilisateurs
+
+    // useEffect(() => {
+    // async const getAllUsers = () => {
+    // const users = await prisma.user.findMany({
+    //   where: {id: {not: session.user.id}, role: {not: "CA"}},
+    //   orderBy : {createdAt: 'desc'}
+    // })}getAllUsers()}, []);
+    const [searchText, setSearchText] = useState("");
+
+      const usersFilter = useMemo(() => {
+        let userTable = [...users];
+    
+        if (searchText.trim()) {
+          const q = searchText.toLowerCase();
+          userTable = userTable.filter((a) => {
+            const fullName = `${a.name ?? ""} ${a.subName ?? ""}`.toLowerCase();
+            const userRole = a.role?.toLowerCase() ?? "";
+            const userEmail =a.email ?.toLowerCase() ?? "";
+    
+            return (
+              fullName.includes(q) ||
+              userRole.includes(q) ||
+              userEmail.includes(q)
+            );
+          });
+        }
+    
+      return userTable;
+      }, [users, searchText]);
+    
+
     const utilisateurs = [
       { name: "Samantha William", info: "Class VII-A", active: false },
       { name: "Tony Soap", info: "Class VII-A", active: true },
@@ -323,7 +358,7 @@ export default async function HomePage() {
               <div className="flex items-center justify-between gap-4">
                 <h1 className={`text-xl font-weight-900 font-extrabold text-[#1f1b4a] lg:text-3xl ${fonts.className}`}>Page d'accueil</h1>
                 <div className="flex items-center gap-3">
-                  <div className="relative w-30 lg:w-72">
+                  <div className="relative w-30 sm:w-40 md:w-50 lg:w-72">
                     <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
                     <Input
                       placeholder="Chercher ici..."
@@ -332,13 +367,6 @@ export default async function HomePage() {
                   </div>
 
                   <div className="flex items-center justify-end gap-3 text-sm px-3 py-2 lg:hidden ">
-                    <div className="text-right">
-                      <p className="text-sm font-semibold text-[#1f1b4a]">{session?.user?.name}</p>
-                      <p className="text-xs uppercase tracking-wide text-slate-500">{session?.user?.role}</p>
-                    </div>
-                    {/* <Avatar className="h-10 w-10">
-                      <AvatarFallback className="bg-[#c8bdf7] text-[#1f1b4a]">NA</AvatarFallback>
-                    </Avatar> */}
                     <DropdownMenuUser name={user.name} email={user.email} />
                   </div>
 
@@ -353,11 +381,11 @@ export default async function HomePage() {
                 </div>
                 <CardContent className="flex flex-wrap items-center gap-6 px-6 pb-6">
                   <Avatar className="h-20 w-20 border-4 border-white -mt-12 shadow-md">
-                    <AvatarFallback className="bg-[#c8bdf7] text-[#1f1b4a] text-xl">NA</AvatarFallback>
+                    <AvatarFallback className="bg-[#c8bdf7] text-[#1f1b4a] text-xl">{user.name ? user.name.charAt(0).toUpperCase() : "U"}</AvatarFallback>
                   </Avatar>
                   <div className="space-y-1 p-b-4">
                     <p className="text-xl font-bold text-[#1f1b4a]">{session?.user?.name}</p>
-                    <p className="text-sm text-slate-500">{session?.user?.role}</p>
+                    <p className="text-sm/5 text-slate-500">{session?.user?.role ? "Coordonateur(rice) apprentissage" : ""}</p>
                   </div>
                   <div className="ml-auto grid grid-cols-2 gap-x-1 gap-y-3 text-sm">
                     <div className="flex items-center gap-3">
@@ -387,20 +415,27 @@ export default async function HomePage() {
                 <Card className="rounded-3xl bg-white md:col-span-1">
                   <CardHeader className="pb-2">
                     <CardTitle className="text-base text-[#1f1b4a]">Utilisateurs</CardTitle>
-                    <p className="text-xs text-slate-500">74 personnes trouvées</p>
+                    <p className="text-xs text-slate-500">{ users.length} utilisateurs trouvés</p>
                   </CardHeader>
                   <CardContent>
                     <div className="relative mb-4">
                       <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
                       <Input
+                        value={searchText}
+                        onChange={(e) => setSearchText(e.target.value)}
                         placeholder="Chercher..."
                         className="pl-10 rounded-full bg-[#f7f7fb] border-slate-200"
                       />
                     </div>
                     <ScrollArea className="h-96 pr-2 space-y-2 gap-2">
-                      {utilisateurs.map((u) => (
+                      {usersFilter.map((u) => {const roleLabel = {
+                          APPRENTI: "Apprenti",
+                          MA: "Maître d'apprentissage",
+                          CA: "Coordonateur(trice) apprentissage",
+                          }[u.role] ?? "";
+                        return (
                         <div
-                          key={u.name}
+                          key={u.id}
                           className={`flex items-center justify-between gap-5 m-3 rounded-2xl border px-3 py-2 ${u.active
                             ? "bg-[#f0ecff] border-[#d5cdf8]"
                             : "bg-white border-slate-200"
@@ -418,7 +453,7 @@ export default async function HomePage() {
                             </Avatar>
                             <div>
                               <p className="text-sm font-semibold text-[#1f1b4a]">{u.name}</p>
-                              <p className="text-xs text-slate-500">{u.info}</p>
+                              <p className="text-xs text-slate-500">{roleLabel}</p>
                             </div>
                           </div>
                           <Button
@@ -426,10 +461,10 @@ export default async function HomePage() {
                             variant="outline"
                             className="h-9 w-9 rounded-full border-[#d5cdf8] text-[#4a27a8] hover:bg-[#f0ecff]"
                           >
-                            <Mail className="h-4 w-4" />
+                            <ArrowRight className="h-4 w-4" />
                           </Button>
                         </div>
-                      ))}
+                      )})}
                     </ScrollArea>
                     <Button
                       variant="ghost"
