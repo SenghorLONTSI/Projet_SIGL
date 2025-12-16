@@ -144,8 +144,6 @@ model JournalAssignment {
   statut     AssignmentStatut @default(EN_COURS)
   createdAt  DateTime         @default(now())
   updatedAt  DateTime         @updatedAt
-  //depositStart DateTime? // début autorisé ajouté par moi
-  //depositEnd   DateTime? // fin autorisée ajouté par moi
   documents  Document[]
   apprenti   apprenti         @relation(fields: [apprentiId], references: [id])
   template   JournalTemplate  @relation(fields: [templateId], references: [id])

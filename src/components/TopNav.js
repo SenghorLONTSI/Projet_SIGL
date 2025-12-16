@@ -3,11 +3,9 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { getSession } from "@/lib/auth-server";
 
-export default function TopNav() {
+export default function TopNav({ role }) {
   const pathname = usePathname();
-  const role = getSession()?.user?.role || null;
 
 
   const linkBase =
@@ -17,8 +15,6 @@ export default function TopNav() {
     "bg-white text-slate-700 border border-slate-200 hover:bg-slate-50";
 
   if (role === "MA") {
-
-
     return (
       <nav className="w-full border-b border-slate-200 bg-white/80 backdrop-blur-md mb-6">
         <div className="max-w-5xl mx-auto flex items-center justify-between px-4 py-3">

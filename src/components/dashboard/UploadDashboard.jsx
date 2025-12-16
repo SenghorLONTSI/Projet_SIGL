@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { FileText, FilePlus2, FolderOpen } from "lucide-react";
-import DepositStatusApprenti from "@/components/upload/DepositStatusApprenti";
+// import DepositStatusApprenti from "@/components/upload/DepositStatusApprenti";
 
 export default function UploadDashboard({ user }) {
   // 🔧 MOCK temporaire
@@ -16,10 +16,10 @@ export default function UploadDashboard({ user }) {
       </h2>
 
       {/* 📅 État du dépôt */}
-      <DepositStatusApprenti
+      {/* <DepositStatusApprenti
         startDate={depositStart}
         endDate={depositEnd}
-      />
+      /> */}
 
       <p className="text-center text-gray-600">
         Sélectionnez le type de document que vous souhaitez déposer.
