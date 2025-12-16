@@ -1,212 +1,194 @@
 // src/app/page.js
-import { prisma } from "../lib/prisma";
-import { requireApprenti } from "../lib/auth";
+import { prisma } from "@/lib/prisma";
+import { getUser, getSession } from "@/lib/auth-server";
+import { redirect } from "next/navigation";
 import Link from "next/link";
-import TopNav from "../components/TopNav";
-
-export const dynamic = "force-dynamic";
-
-function formatDate(d) {
-  if (!d) return "—";
-  try {
-    return new Intl.DateTimeFormat("fr-FR", {
-      dateStyle: "medium",
-      timeZone: "Europe/Paris",
-    }).format(d);
-  } catch {
-    return d.toString();
-  }
-}
-
-// Récupère les journaux de l'apprenti connecté
-async function getApprentiJournals(apprentiId) {
-  return prisma.journalAssignment.findMany({
-    where: { apprentiId },
-    include: {
-      template: true,
-    },
-    orderBy: { createdAt: "desc" },
-  });
-}
 
 export default async function HomePage() {
-  // 1) Vérifier que l'utilisateur est bien un apprenti connecté
-  let user;
-  try {
-    user = await requireApprenti();
-  } catch {
+  const session = await getSession();
+  if (!session) redirect("/login");
+
+  const user = await getUser();
+  if (!user) redirect("/login");
+
+  if (session.user.role !== "APPRENTI") {
     return (
-      <main className="min-h-screen flex items-center justify-center bg-gradient-to-b from-sky-50 via-sky-100 to-sky-50">
-        <div className="bg-white/90 rounded-3xl shadow-lg px-8 py-6 text-center space-y-3 border border-sky-100">
-          <h1 className="text-2xl font-semibold text-slate-900">Bienvenue</h1>
-          <p className="text-slate-600">
-            Vous devez être connecté en tant qu&apos;apprenti pour accéder à votre
-            espace.
-          </p>
-          <Link
-            href="/login"
-            className="inline-flex items-center gap-1 rounded-full bg-blue-600 text-white text-sm font-medium px-5 py-2.5 hover:bg-blue-700 transition shadow-sm"
-          >
-            Se connecter
-          </Link>
-        </div>
-      </main>
+      <div className="p-10 text-center">
+        <h1 className="text-2xl font-bold">
+          Espace non disponible pour ce rôle
+        </h1>
+      </div>
     );
   }
 
-  // 2) Récupérer les journaux de cet apprenti
-  const assignments = await getApprentiJournals(user.id);
+  const apprenti = await prisma.apprenti.findUnique({
+    where: { userId: user.id },
+    include: {
+      user: true,
+      journalAssignments: {
+        include: { template: true },
+        orderBy: { createdAt: "desc" },
+      },
+    },
+  });
 
-  const total = assignments.length;
-  const enCours = assignments.filter((a) => a.statut === "EN_COURS").length;
-  const enRetard = assignments.filter((a) => a.statut === "EN_RETARD").length;
-  const termines = assignments.filter((a) => a.statut === "TERMINE").length;
+  if (!apprenti) redirect("/login");
 
-  // Prochaine échéance (la plus proche parmi les deadlines)
-  const withDeadline = assignments
-    .filter((a) => a.template?.deadline)
-    .sort(
-      (a, b) =>
-        new Date(a.template.deadline) - new Date(b.template.deadline)
-    );
-  const nextDeadline = withDeadline[0] || null;
-
-  // Les 3 prochains journaux à rendre
-  const prochains = withDeadline.slice(0, 3);
+  const journaux = apprenti.journalAssignments;
+  const total = journaux.length;
+  const valides = journaux.filter((j) => j.statut === "TERMINE").length;
+  const aTraiter = total - valides;
 
   return (
-    <main className="min-h-screen bg-gradient-to-b from-sky-50 via-sky-100 to-sky-50">
-      <TopNav />
+    <div className="min-h-screen bg-[#f5f6fb] text-slate-900">
+      {/* HEADER PROFIL */}
+      <section className="mx-auto max-w-6xl mt-6 rounded-[32px] bg-white shadow overflow-hidden">
+        <div className="relative h-24 bg-[#5141d6]">
+          <div className="absolute bottom-[-32px] left-6 h-24 w-24 rounded-full bg-[#c9c3ff] border-4 border-white" />
+          <div className="absolute right-[-40px] bottom-[-40px] h-40 w-40 rounded-full bg-[#ffcc33]" />
+          <div className="absolute right-[30px] bottom-[-30px] h-28 w-28 rounded-full bg-[#ff8a4a]" />
+        </div>
 
-      <div className="max-w-5xl mx-auto px-6 py-10 space-y-8">
-        {/* Header : bienvenue */}
-        <header className="space-y-2">
-          <h1 className="text-4xl font-extrabold tracking-tight text-slate-900">
-            Bonjour {user.firstName || ""} {user.lastName || ""}
-          </h1>
-          <p className="text-slate-700 text-sm sm:text-base">
-            Bienvenue sur votre espace apprenti. Retrouvez ici une synthèse de vos journaux.
-          </p>
-        </header>
+        <div className="px-6 pb-6 pt-10 flex justify-between items-center">
+          <div className="ml-28 space-y-2">
+            <h1 className="text-2xl font-bold">
+              {apprenti.name} {apprenti.subName ?? ""}
+            </h1>
 
-        {/* Cartes de synthèse */}
-        <section className="grid grid-cols-1 sm:grid-cols-4 gap-4">
-          <div className="bg-white/95 rounded-2xl shadow-sm border border-sky-300 p-4">
-            <div className="text-[11px] tracking-wide uppercase text-slate-500">
-              Tous mes journaux
-            </div>
-            <div className="mt-2 text-3xl font-bold text-slate-900">{total}</div>
-          </div>
-          <div className="bg-white/95 rounded-2xl shadow-sm border border-sky-400 p-4">
-            <div className="text-[11px] tracking-wide uppercase text-slate-500">
-              En cours
-            </div>
-            <div className="mt-2 text-3xl font-bold text-sky-700">{enCours}</div>
-          </div>
-          <div className="bg-white/95 rounded-2xl shadow-sm border border-rose-300 p-4">
-            <div className="text-[11px] tracking-wide uppercase text-slate-500">
-              En retard
-            </div>
-            <div className="mt-2 text-3xl font-bold text-rose-600">{enRetard}</div>
-          </div>
-          <div className="bg-white/95 rounded-2xl shadow-sm border border-emerald-300 p-4">
-            <div className="text-[11px] tracking-wide uppercase text-slate-500">
-              Terminés
-            </div>
-            <div className="mt-2 text-3xl font-bold text-emerald-600">{termines}</div>
-          </div>
-        </section>
+            <div className="text-sm text-slate-700 space-y-1">
+              <div className="flex items-center gap-2">
+                <span className="h-7 w-7 flex items-center justify-center rounded-full bg-[#ff8a4a] text-white">
+                  📞
+                </span>
+                <span>+33 0 00 00 00 00</span>
+              </div>
 
-        {/* Prochaine échéance */}
-        <section className="bg-white/95 rounded-3xl shadow-sm border border-sky-100 p-6 space-y-4">
-          <div className="flex items-center justify-between gap-2">
-            <h2 className="text-lg font-semibold text-slate-900">
-              Prochaine échéance
+              <div className="flex items-center gap-2">
+                <span className="h-7 w-7 flex items-center justify-center rounded-full bg-[#ff8a4a] text-white">
+                  ✉️
+                </span>
+                <span>{apprenti.user.email}</span>
+              </div>
+            </div>
+          </div>
+
+          {/* zone boutons à droite */}
+          <div className="flex items-center gap-3 mr-4">
+            {/* bouton Calendrier */}
+            <Link
+              href="/calendrier"
+              className="hidden sm:inline-flex items-center gap-2 rounded-full bg-white/90 border border-[#5141d6]/20 px-4 py-1.5 text-xs font-medium text-[#5141d6] hover:bg-[#f4f2ff] transition"
+            >
+              <span>📅</span>
+              <span>Calendrier</span>
+            </Link>
+
+            {/* bouton profil */}
+            <Link
+              href="/profil"
+              className="h-9 w-9 rounded-full text-xl text-[#ff8a4a] hover:bg-[#fff1e6] flex items-center justify-center"
+            >
+              ✏️
+            </Link>
+          </div>
+        </div>
+      </section>
+
+      {/* 3 colonnes */}
+      <div className="mx-auto max-w-6xl px-4 py-8 grid gap-4 lg:grid-cols-[1fr,1.6fr,1fr]">
+        {/* COLONNE 1 */}
+        <div className="space-y-4">
+          <div className="rounded-3xl bg-white p-4 shadow">
+            <h2 className="text-sm font-semibold mb-2">
+              Dernières informations
             </h2>
+            <p className="text-xs">
+              Vous n&apos;avez aucune conversation non lue.
+            </p>
+          </div>
+
+          <div className="rounded-3xl bg-white p-4 shadow">
+            <div className="flex justify-between items-center mb-2">
+              <h2 className="text-sm font-semibold">Évènements</h2>
+              <Link
+                href="/evenements"
+                className="text-xs text-[#5141d6] font-medium"
+              >
+                Voir plus
+              </Link>
+            </div>
+            <p className="text-xs">Aucun évènement.</p>
+          </div>
+        </div>
+
+        {/* COLONNE 2 : Journaux de bord */}
+        <div className="rounded-3xl bg-white p-4 shadow">
+          <div className="flex justify-between mb-3">
+            <h2 className="text-sm font-semibold">Journaux de bord</h2>
+            {/* Voir plus -> page /journaux */}
             <Link
               href="/journaux"
-              className="text-sm text-blue-700 hover:underline font-medium"
+              className="text-xs text-[#5141d6] font-medium"
             >
-              Voir tous mes journaux →
+              Voir plus
             </Link>
           </div>
 
-          {!nextDeadline && (
-            <p className="text-sm text-slate-600">
-              Vous n&apos;avez pas encore de journal avec une date limite configurée.
-            </p>
-          )}
-
-          {nextDeadline && (
-            <div className="rounded-2xl border border-slate-200 bg-slate-50/80 px-5 py-4 space-y-1">
-              <div className="text-sm font-semibold text-slate-900">
-                {nextDeadline.template?.Titre ||
-                  nextDeadline.template?.code ||
-                  "Journal"}
-              </div>
-              <div className="text-xs text-slate-600">
-                À rendre pour le{" "}
-                <span className="font-medium">
-                  {formatDate(nextDeadline.template.deadline)}
-                </span>
-              </div>
-              <div className="text-xs text-slate-600">
-                Statut :{" "}
-                <span className="uppercase tracking-wide font-medium">
-                  {nextDeadline.statut.replace("_", " ")}
-                </span>
-              </div>
-            </div>
-          )}
-        </section>
-
-        {/* Prochains journaux à compléter */}
-        <section className="space-y-3">
-          <h2 className="text-lg font-semibold text-slate-900">
-            Mes prochains journaux
-          </h2>
-
-          {prochains.length === 0 && (
-            <p className="text-sm text-slate-600">
-              Aucun journal à venir pour le moment.
-            </p>
-          )}
-
-          {prochains.length > 0 && (
-            <div className="space-y-3">
-              {prochains.map((a) => (
-                <div
-                  key={a.id}
-                  className="bg-white/95 rounded-3xl shadow-sm border border-slate-200 px-5 py-4 flex items-center justify-between gap-4"
-                >
-                  <div className="space-y-1">
-                    <div className="text-sm font-semibold text-slate-900">
-                      {a.template?.Titre || a.template?.code || "Journal"}
-                    </div>
-                    <div className="text-xs text-slate-600">
-                      À rendre pour le{" "}
-                      <span className="font-medium">
-                        {formatDate(a.template?.deadline)}
-                      </span>
-                    </div>
-                    <div className="text-xs text-slate-600">
-                      Période : {a.template?.periode || "—"}
-                    </div>
-                  </div>
-
-                  <Link
-                    href={`/journaux/${a.id}`}
-                    className="inline-flex items-center gap-1 rounded-full bg-blue-600 text-white text-xs font-medium px-4 py-2.5 hover:bg-blue-700 transition shadow-sm"
-                  >
-                    Compléter
-                    <span aria-hidden>→</span>
-                  </Link>
+          <div className="space-y-2">
+            {journaux.slice(0, 4).map((j) => (
+              <Link
+                key={j.id}
+                href={`/journal/${j.id}`}
+                className="block rounded-2xl bg-[#f4f2ff] p-3 flex justify-between items-start hover:bg-[#e7e2ff] transition"
+              >
+                <div>
+                  <p className="font-medium">
+                    {j.template?.Titre ?? j.template?.code ?? "Journal"}
+                  </p>
+                  <p className="text-xs text-slate-600">
+                    {new Date(j.createdAt).toLocaleDateString("fr-FR")}
+                  </p>
                 </div>
-              ))}
+                <span className="text-xs bg-[#e3dcff] text-[#5141d6] px-2 py-1 rounded-full">
+                  {j.statut}
+                </span>
+              </Link>
+            ))}
+          </div>
+        </div>
+
+        {/* COLONNE 3 : Statuts rapides */}
+        <div className="rounded-3xl bg-white p-4 shadow space-y-4">
+          <div>
+            <h2 className="text-sm font-semibold mb-2">Statuts rapides</h2>
+            <div className="grid grid-cols-3 gap-2">
+              <Link
+                href="/journal"
+                className="rounded-xl bg-[#f4f2ff] p-2 text-center hover:bg-[#e7e2ff] transition"
+              >
+                <p className="text-[11px] text-slate-500">Total</p>
+                <p className="text-lg font-bold text-[#5141d6]">{total}</p>
+              </Link>
+
+              <Link
+                href="/journal"
+                className="rounded-xl bg-[#e3f9e7] p-2 text-center hover:bg-[#cff5d8] transition"
+              >
+                <p className="text-[11px] text-emerald-600">Validé</p>
+                <p className="text-lg font-bold text-emerald-700">{valides}</p>
+              </Link>
+
+              <Link
+                href="/journal"
+                className="rounded-xl bg-[#ffe9e3] p-2 text-center hover:bg-[#ffd7c9] transition"
+              >
+                <p className="text-[11px] text-[#d9480f]">À traiter</p>
+                <p className="text-lg font-bold text-[#d9480f]">{aTraiter}</p>
+              </Link>
             </div>
-          )}
-        </section>
+          </div>
+        </div>
       </div>
-    </main>
+    </div>
   );
 }
