@@ -1,38 +1,23 @@
-// <<<<<<< HEAD
-// import Image from "next/image";
-// import { getUser, getSession } from "@/lib/auth-server";
-// import { redirect } from "next/navigation";
-// import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
-
-// export default async function Home() {
-//   const session = await getSession();
-//   if (!session) {
-//     redirect("/login");
-//   }
-
-//   const user = await getUser();
-//   if (!user) {
-//     redirect("/login");
-//   }
-// =======
-// src/app/page.js
-
 import { prisma } from "../lib/prisma";
 import { requireApprenti } from "../lib/auth";
 import { getUser, getSession, requireRole } from "@/lib/auth-server";
 import { redirect } from "next/navigation";
 import Link from "next/link";
 import TopNav from "../components/TopNav";
+import { fonts } from "../app/font";
+import { Search,Mail,Phone,ArrowRight } from "lucide-react";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import DropdownMenuUser from "@/components/DropdownMenuUser";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
-import { Mail, Phone, Search } from "lucide-react";
-import { fonts } from "./font";
-import DropdownMenuUser from "@/components/DropdownMenuUser";
+import { Button } from "@/components/ui/button";
+
+
+import { get } from "react-hook-form";
+import HomePageCA from "@/components/homePage/HomePageCA";
 export const dynamic = "force-dynamic";
 
 function formatDate(d) {
@@ -704,7 +689,7 @@ if (session?.user?.role === "MA") {
 
     return (
       <main className="min-h-fit  bg-[#F3F4FF] text-slate-900">
-        { <TopNav /> }
+        {/* <TopNav /> */}
 
         <div className=" w-full px-6 py-8 space-y-6">
 
