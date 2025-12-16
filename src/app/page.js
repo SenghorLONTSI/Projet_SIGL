@@ -410,7 +410,7 @@ if (session?.user?.role === "MA") {
               </CardContent>
             </Card>
 
-            {/* 2 cards (comme CA) : Apprentis + Notifications */}
+            { Apprentis + Notifications */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
               {/* Apprentis */}
               <Card className="rounded-3xl bg-white md:col-span-1">
@@ -418,7 +418,7 @@ if (session?.user?.role === "MA") {
                   <CardTitle className="text-base text-[#1f1b4a]">
                     Mes apprentis
                   </CardTitle>
-                  {/* CTA */}
+                  
               <Link
                 href="/MA/liste_apprentis"
                 className="inline-flex w-full justify-center items-center gap-2 rounded-full bg-blue-600 text-white text-sm font-medium px-5 py-3 hover:bg-blue-700 transition shadow-sm"
