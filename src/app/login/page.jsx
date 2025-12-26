@@ -62,6 +62,7 @@ const pageSignIn = () => {
           toast.success("🤪 Connexion réussie", {
             description: "Direction la page d'accueil !",
           });
+          
           router.push("/");
           setLoading(true);
         },
