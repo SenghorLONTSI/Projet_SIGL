@@ -30,6 +30,7 @@ model User {
   updatedAt     DateTime
   accounts      Account[]
   apprenti      apprenti?
+  event         event[]
   ma            ma?
   maReviews     Review[]  @relation("MAUserReviews")
   sessions      Session[]
@@ -94,6 +95,9 @@ model apprenti {
   ma                 ma?                 @relation(fields: [idMA], references: [id])
   tp                 tp?                 @relation(fields: [idTP], references: [id])
   user               User                @relation(fields: [userId], references: [id], onDelete: Cascade)
+  entretien          entretien[]
+  entretien2         entretien2[]
+  event              event[]
   journalAssignments JournalAssignment[]
   journalSlots       JournalSlot[]
 
@@ -204,6 +208,50 @@ model Document {
   slot                JournalSlot?       @relation(fields: [journalSlotId], references: [id], onDelete: Cascade)
 
   @@map("document")
+}
+
+model entretien {
+  id           Int      @id @default(autoincrement())
+  date         DateTime
+  heure        String
+  theme        String?
+  participants String
+  apprentiId   String
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime
+  apprenti     apprenti @relation(fields: [apprentiId], references: [id], onDelete: Cascade)
+}
+
+model event {
+  id          String    @id
+  title       String
+  description String?
+  eventType   String?   @default("REUNION")
+  startDate   DateTime  @db.Timestamp(6)
+  endDate     DateTime  @db.Timestamp(6)
+  location    String?
+  userId      String
+  apprentiId  String?
+  createdAt   DateTime? @default(now()) @db.Timestamp(6)
+  updatedAt   DateTime? @default(now()) @db.Timestamp(6)
+  apprenti    apprenti? @relation(fields: [apprentiId], references: [id], onUpdate: NoAction)
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@index([apprentiId])
+  @@index([startDate])
+  @@index([userId])
+}
+
+model entretien2 {
+  id           Int      @id @default(autoincrement())
+  date         DateTime
+  heure        String
+  theme        String?
+  participants String
+  apprentiId   String
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime
+  apprenti     apprenti @relation(fields: [apprentiId], references: [id], onDelete: Cascade)
 }
 
 enum Role {

@@ -40,9 +40,7 @@ async function getMaDashboardData(userId) {
       apprenti: {
         include: {
           user: true,
-          journalAssignments: {
-            include: { template: true },
-          },
+          journalAssignments: { include: { template: true } },
         },
       },
     },
@@ -52,6 +50,7 @@ async function getMaDashboardData(userId) {
     return { ma: null, apprentices: [], notifications: [] };
   }
 
+  // ===== Mes apprentis (inchangé) =====
   const apprentices = ma.apprenti.map((a) => ({
     id: a.id,
     name: a.user?.name ?? "",
@@ -59,21 +58,50 @@ async function getMaDashboardData(userId) {
     email: a.user?.email ?? "",
   }));
 
-  const notifications = ma.apprenti
-    .flatMap((a) =>
-      (a.journalAssignments ?? []).map((assign) => ({
-        id: assign.id,
-        apprentiName: `${a.user?.name ?? ""} ${a.user?.subName ?? ""}`.trim(),
-        templateTitle: assign.template?.Titre || assign.template?.code || "Journal",
-        statut: assign.statut,
-        createdAt: assign.createdAt,
-      }))
-    )
+  // ===== Activités récentes - JOURNAUX (comme avant, format proche) =====
+  const journalNotifs = ma.apprenti.flatMap((a) =>
+    (a.journalAssignments ?? []).map((assign) => ({
+      id: `journal-${assign.id}`,
+      type: "JOURNAL",
+      apprentiName: `${a.user?.name ?? ""} ${a.user?.subName ?? ""}`.trim(),
+      templateTitle: assign.template?.Titre || assign.template?.code || "Journal",
+      statut: assign.statut,
+      createdAt: assign.createdAt,
+    }))
+  );
+
+  // ===== Activités récentes - ENTRETIENS (nouveau) =====
+  const apprentiIds = ma.apprenti.map((a) => a.id);
+
+  const entretiens = await prisma.entretien.findMany({
+    where: { apprentiId: { in: apprentiIds } },
+    orderBy: { createdAt: "desc" },
+    take: 8,
+    include: { apprenti: { include: { user: true } } },
+  });
+
+  const entretienNotifs = entretiens.map((e) => ({
+    id: `entretien-${e.id}`,
+    type: "ENTRETIEN",
+    apprentiName: `${e.apprenti?.user?.name ?? ""} ${e.apprenti?.user?.subName ?? ""}`.trim(),
+    templateTitle: e.theme || "Entretien",
+    statut: "PLANIFIE", // affichage
+    createdAt: e.createdAt,
+    entretien: {
+      date: e.date,
+      heure: e.heure,
+      participants: e.participants,
+    },
+  }));
+
+  // ===== Fusion + tri =====
+  const notifications = [...journalNotifs, ...entretienNotifs]
     .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
     .slice(0, 8);
 
   return { ma, apprentices, notifications };
 }
+
 
 // ==========================
 // PAGE PRINCIPALE
@@ -501,30 +529,39 @@ export default async function HomePage() {
                     <ScrollArea className="h-96 pr-2">
                       <div className="space-y-2">
                         {notifications.map((n) => (
-                          <div
-                            key={n.id}
-                            className="flex items-center justify-between gap-3 rounded-xl px-3 py-3 m-3 hover:bg-[#f7f7fb]"
-                          >
-                            <div className="space-y-0.5">
-                              <p className="text-sm font-semibold text-[#1f1b4a]">
-                                {n.apprentiName}
-                              </p>
-                              <p className="text-xs text-slate-500">
-                                {n.templateTitle} — {n.statut.replace("_", " ")}
-                              </p>
+                            <div
+                              key={n.id}
+                              className="flex items-center justify-between gap-3 rounded-xl px-3 py-3 m-3 hover:bg-[#f7f7fb]"
+                            >
+                              <div className="space-y-0.5">
+                                <p className="text-sm font-semibold text-[#1f1b4a]">
+                                  {n.apprentiName}
+                                </p>
+
+                                {/* Ligne secondaire */}
+                                {n.type === "ENTRETIEN" ? (
+                                  <p className="text-xs text-slate-500"> A programmé un entretien avec vous pour le 
+                                    {/*n.templateTitle} —*/} {formatDate(n.entretien?.date)} à {n.entretien?.heure}
+                                  </p>
+                                ) : (
+                                  <p className="text-xs text-slate-500">
+                                    {n.templateTitle} — {n.statut.replace("_", " ")}
+                                  </p>
+                                )}
+                              </div>
+
+                              <Badge className="rounded-full bg-[#ff7c4c] text-white px-2 py-1 text-[10px]">
+                                {formatDate(n.createdAt)}
+                              </Badge>
                             </div>
+                          ))}
 
-                            <Badge className="rounded-full bg-[#ff7c4c] text-white px-2 py-1 text-[10px]">
-                              {formatDate(n.createdAt)}
-                            </Badge>
-                          </div>
-                        ))}
+                          {notifications.length === 0 && (
+                            <div className="m-3 text-sm text-slate-500">
+                              Aucune activité récente.
+                            </div>
+                          )}
 
-                        {notifications.length === 0 && (
-                          <div className="m-3 text-sm text-slate-500">
-                            Aucune activité récente.
-                          </div>
-                        )}
                       </div>
                     </ScrollArea>
 
