@@ -2,43 +2,86 @@ import { NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 
 export async function middleware(request) {
-    const { pathname } = request.nextUrl;
-    alert(pathname)
+  const { pathname } = request.nextUrl;
 
+  console.log("MIDDLEWARE:", pathname);
 
-    // On ne touche pas aux assets ni aux APIs publiques
-    if (pathname.startsWith('/_next') || pathname.startsWith('/api/public')) {
-        return NextResponse.next()
-    }
-
-
-    const session = await auth.api.getSession({
-        headers: request.headers,
-    });
-    // Auth obligatoire pour /app et /api
-    if (!session) {
-        const url = new URL("/login", request.url);
-        url.searchParams.set("from", pathname);
-        return NextResponse.redirect(url);
-    }
-
-
-    // Protection spécifique pour /MA
-    if (pathname.startsWith("/MA")) {
-        const role = session.user?.role
-        const allowed = role === 'user' || role === 'admin' // adapte selon tes roles
-        if (!allowed) {
-            return NextResponse.redirect(new URL('/403', request.url))
-        }
-    }
-
+  // ==========================
+  // 1️⃣ Ignorer assets & pages publiques
+  // ==========================
+  if (
+    pathname.startsWith("/_next") ||
+    pathname.startsWith("/favicon.ico") ||
+    pathname.startsWith("/api/public") ||
+    pathname === "/login"
+  ) {
     return NextResponse.next();
+  }
+
+  // ==========================
+  // 2️⃣ Récupération session
+  // ==========================
+  const session = await auth.api.getSession({
+    headers: request.headers,
+  });
+
+  // ==========================
+  // 3️⃣ Non connecté → login
+  // ==========================
+  if (!session?.user) {
+    const url = new URL("/login", request.url);
+    url.searchParams.set("from", pathname);
+    return NextResponse.redirect(url);
+  }
+
+  // ==========================
+  // 4️⃣ Protection MA (inchangé)
+  // ==========================
+  if (pathname.startsWith("/MA")) {
+    const role = session.user.role;
+    const allowed = role === "MA"; // adapte si besoin
+
+    if (!allowed) {
+      return NextResponse.redirect(new URL("/403", request.url));
+    }
+  }
+
+  // ==========================
+  // 5️⃣ ✅ Protection TP (AJOUT)
+  // ==========================
+  if (pathname.startsWith("/TP")) {
+    if (session.user.role !== "TP") {
+      return NextResponse.redirect(new URL("/403", request.url));
+    }
+  }
+
+  // ==========================
+  // 6️⃣ Accès racine → redirection selon rôle
+  // ==========================
+  if (pathname === "/") {
+    if (session.user.role === "TP") {
+      return NextResponse.redirect(new URL("/TP/Accueil", request.url));
+    }
+    if (session.user.role === "MA") {
+      return NextResponse.redirect(new URL("/MA", request.url));
+    }
+    if (session.user.role === "CA") {
+      return NextResponse.redirect(new URL("/CA", request.url));
+    }
+  }
+
+  return NextResponse.next();
 }
 
-// Adapter selon ta structure
+// ==========================
+// MATCHER (on garde MA + TP)
+// ==========================
 export const config = {
-    matcher: ["/app/:path*",
-        '/MA/:path*',
-        '/api/MA/:path*'
-    ],
+  matcher: [
+    "/",
+    "/MA/:path*",
+    "/TP/:path*",
+    "/api/MA/:path*",
+    "/api/TP/:path*",
+  ],
 };

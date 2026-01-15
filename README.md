@@ -263,20 +263,12 @@ Voici toutes les variables d'environnement disponibles :
 
 ```env
 # Base de données
-DATABASE_URL="postgresql://user:password@host:port/database"
-DATABASE_URL_UNPOOLED="postgresql://user:password@host:port/database" # Pour les migrations
+DATABASE_URL="postgresql://neondb_owner:npg_xa14ETDnKHQf@ep-raspy-truth-abcgqd6r-pooler.eu-west-2.aws.neon.tech/neondb?sslmode=require&channel_binding=require"
+
 
 # Authentification
-BETTER_AUTH_SECRET="votre_cle_secrete"
+BETTER_AUTH_SECRET="CVj8uYSJADXovGHQYTQxgOl8YSyjy7yo"
 BETTER_AUTH_URL="http://localhost:3000"
-NEXT_PUBLIC_APP_URL="http://localhost:3000"
-
-# Email (optionnel, pour les notifications)
-SMTP_HOST="smtp.gmail.com"
-SMTP_PORT="587"
-SMTP_USER="votre.email@gmail.com"
-SMTP_PASSWORD="votre_mot_de_passe_app"
-SMTP_FROM="noreply@capapprenti.com"
 
 # Stockage de fichiers (optionnel)
 UPLOAD_DIR="./uploads"
@@ -379,11 +371,6 @@ npm run build
 - **MBOSSO Joan**
 - **NDIAYE Birahim**
 
----
-
-## 📄 Licence
-
-[À définir]
 
 ---
 
