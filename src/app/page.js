@@ -15,6 +15,8 @@ import { Separator } from "@/components/ui/separator";
 import { Button } from "@/components/ui/button";
 import UploadDashboard from "@/components/dashboard/UploadDashboard";
 import HomePageCA from "@/components/homePage/HomePageCA";
+import ApprentiCalendar from "@/components/calendar/CalendarManagement";
+import ApprentiCalendarWrapper from "@/components/calendar/ApprentiCalendarWrapper";
 
 export const dynamic = "force-dynamic";
 
@@ -197,6 +199,14 @@ export default async function HomePage() {
                 </div>
               </div>
             )}
+          </section>
+
+          <section className="bg-white/95 rounded-3xl shadow-sm border border-sky-100 p-6 space-y-4">
+                <h2 className="text-lg font-semibold text-slate-900">
+                 Mon calendrier
+                </h2>
+
+          <ApprentiCalendarWrapper userId={user.id} userRole="APPRENTI" />
           </section>
 
           {/* Prochains journaux à compléter */}
@@ -537,6 +547,23 @@ export default async function HomePage() {
                   </CardContent>
                 </Card>
               </div>
+
+              <div className="lg:col-span-3 mt-8">
+  <Card className="rounded-3xl bg-white">
+    <CardHeader>
+      <CardTitle className="text-lg text-[#1f1b4a]">
+        Calendrier des événements
+      </CardTitle>
+      <p className="text-xs text-slate-500">
+        Gérer les soutenances, entretiens et événements de vos apprentis
+      </p>
+    </CardHeader>
+    <CardContent>
+      <ApprentiCalendarWrapper userId={user.id} userRole="MA" />
+    </CardContent>
+  </Card>
+</div>
+              
             </div>
 
             {/* COLONNE DROITE */}

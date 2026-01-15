@@ -3,6 +3,7 @@ import { getSession } from "@/lib/auth-server";
 import { redirect } from "next/navigation";
 import Link from "next/link";
 import DropdownMenuUser from "@/components/DropdownMenuUser";
+import ApprentiCalendarWrapper from "@/components/calendar/ApprentiCalendarWrapper";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Input } from "@/components/ui/input";
@@ -310,6 +311,17 @@ export default async function TPAccueilPage() {
                     )}
                   </div>
                 </ScrollArea>
+              </CardContent>
+            </Card>
+
+            {/* CALENDRIER */}
+            <Card className="rounded-3xl bg-white">
+              <CardHeader>
+                <CardTitle>Calendrier des événements</CardTitle>
+                <p className="text-xs text-slate-500">Gérez les événements de vos apprentis</p>
+              </CardHeader>
+              <CardContent>
+                <ApprentiCalendarWrapper userId={user.id} userRole="TP" />
               </CardContent>
             </Card>
           </div>
