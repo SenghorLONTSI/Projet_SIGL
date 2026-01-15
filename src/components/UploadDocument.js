@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 
 export default function JournalDocumentUpload({ journalAssignmentId, initialDocument }) {
@@ -14,10 +14,42 @@ export default function JournalDocumentUpload({ journalAssignmentId, initialDocu
   const [selectedFile, setSelectedFile] = useState(null);
 
   // Fichier "enregistré" en tmp côté serveur (PAS en base)
-  const [staged, setStaged] = useState(null); // { tempKey, tempUrl, meta }
+  const [staged, setStaged] = useState(null); // { ok, tempKey, tempUrl, meta }
 
   const [busy, setBusy] = useState(false);
   const [msg, setMsg] = useState("");
+
+  // ✅ clé unique par journal (persistance brouillon)
+  const STORAGE_KEY = useMemo(
+    () => `sigl:journal:draft:${journalAssignmentId}`,
+    [journalAssignmentId]
+  );
+
+  // ✅ restore du brouillon au refresh (si PAS soumis)
+  useEffect(() => {
+    if (savedDoc) return; // soumis => on ignore tout brouillon
+
+    try {
+      const raw = localStorage.getItem(STORAGE_KEY);
+      if (!raw) return;
+
+      const parsed = JSON.parse(raw);
+      if (parsed?.tempKey && parsed?.tempUrl) {
+        setStaged(parsed);
+      }
+    } catch {
+      // ignore
+    }
+  }, [STORAGE_KEY, savedDoc]);
+
+  function persistDraft(next) {
+    try {
+      if (!next) localStorage.removeItem(STORAGE_KEY);
+      else localStorage.setItem(STORAGE_KEY, JSON.stringify(next));
+    } catch {
+      // ignore
+    }
+  }
 
   function pickFile() {
     setMsg("");
@@ -64,7 +96,9 @@ export default function JournalDocumentUpload({ journalAssignmentId, initialDocu
       const data = await res.json();
       if (!res.ok || !data?.ok) throw new Error(data?.error || "Stage failed");
 
-      setStaged(data); // { tempKey, tempUrl, meta }
+      setStaged(data);            // { tempKey, tempUrl, meta }
+      persistDraft(data);         // ✅ persiste pour refresh
+
       setSelectedFile(null);
       if (inputRef.current) inputRef.current.value = "";
       setMsg("Document enregistré (brouillon) ✅ — pas encore soumis.");
@@ -92,6 +126,7 @@ export default function JournalDocumentUpload({ journalAssignmentId, initialDocu
       if (!res.ok || !data?.ok) throw new Error(data?.error || "Delete tmp failed");
 
       setStaged(null);
+      persistDraft(null); // ✅ clear storage
       setMsg("Brouillon supprimé.");
     } catch (e) {
       console.error(e);
@@ -114,22 +149,24 @@ export default function JournalDocumentUpload({ journalAssignmentId, initialDocu
         body: JSON.stringify({
           journalAssignmentId,
           tempKey: staged.tempKey,
-          // optionnel : tu peux passer les meta si tu veux
-          fileName: staged.meta?.fileName,
-          mimeType: staged.meta?.mimeType,
-          size: staged.meta?.size,
+          meta: {
+            fileName: staged.meta?.fileName,
+            mimeType: staged.meta?.mimeType,
+            size: staged.meta?.size,
+          },
         }),
       });
 
       const data = await res.json();
       if (!res.ok || !data?.ok) throw new Error(data?.error || "Submit failed");
 
-      // data.document = ligne Prisma Document
+      // Si déjà soumis, l’API peut renvoyer alreadySubmitted
       setSavedDoc(data.document);
       setStaged(null);
-      setMsg("Document soumis ✅ ");
+      persistDraft(null); // ✅ clear storage
+      setMsg(data.alreadySubmitted ? "Déjà soumis ✅" : "Document soumis ✅");
 
-      router.refresh(); // recharge server component (liste docs)
+      router.refresh(); // recharge server component
     } catch (e) {
       console.error(e);
       setMsg("Erreur lors de la soumission.");
@@ -138,7 +175,7 @@ export default function JournalDocumentUpload({ journalAssignmentId, initialDocu
     }
   }
 
-  // Si déjà soumis (en base) => on affiche seulement l’état (modifiable plus tard)
+  // ✅ Si déjà soumis (en base) => verrouillé, impossible de déposer un autre
   if (savedDoc) {
     return (
       <section className="bg-white p-6 rounded-2xl shadow space-y-3">
@@ -172,7 +209,7 @@ export default function JournalDocumentUpload({ journalAssignmentId, initialDocu
 
       <input ref={inputRef} type="file" className="hidden" onChange={onFileChange} />
 
-      {/* Si un brouillon existe (tmp) */}
+      {/* ✅ Si un brouillon existe (tmp) - visible même après refresh */}
       {staged && (
         <div className="flex items-center justify-between gap-3 rounded-xl border border-slate-200 bg-slate-50 px-4 py-3">
           <div className="text-sm text-slate-800">
@@ -183,7 +220,6 @@ export default function JournalDocumentUpload({ journalAssignmentId, initialDocu
           </div>
 
           <div className="flex items-center gap-2">
-            {/* Remplacer = choisir un nouveau fichier (puis Enregistrer) */}
             <button
               type="button"
               onClick={pickFile}
@@ -194,7 +230,6 @@ export default function JournalDocumentUpload({ journalAssignmentId, initialDocu
               Remplacer
             </button>
 
-            {/* Poubelle = supprime le brouillon */}
             <button
               type="button"
               onClick={handleDeleteDraft}

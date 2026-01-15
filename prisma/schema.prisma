@@ -20,18 +20,19 @@ model Post {
 
 model User {
   id            String    @id
-  email         String    @unique
   name          String
   subName       String?
+  email         String    @unique
   emailVerified Boolean
   image         String?
+  role          Role      @default(USER)
   createdAt     DateTime
   updatedAt     DateTime
-  role          Role      @default(USER)
   accounts      Account[]
-  sessions      Session[]
   apprenti      apprenti?
   ma            ma?
+  review        review[]
+  sessions      Session[]
   tp            tp?
 
   @@map("user")
@@ -40,7 +41,7 @@ model User {
 model Session {
   id        String   @id
   expiresAt DateTime
-  token     String
+  token     String   @unique
   createdAt DateTime
   updatedAt DateTime
   ipAddress String?
@@ -48,14 +49,13 @@ model Session {
   userId    String
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  @@unique([token])
   @@map("session")
 }
 
 model Account {
   id                    String    @id
-  accountId             String
   providerId            String
+  userId                String
   accessToken           String?
   refreshToken          String?
   idToken               String?
@@ -65,7 +65,7 @@ model Account {
   password              String?
   createdAt             DateTime
   updatedAt             DateTime
-  userId                String
+  accountId             String
   user                  User      @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@map("account")
@@ -83,20 +83,22 @@ model Verification {
 }
 
 model apprenti {
-  id        String   @id
-  userId    String   @unique
-  name      String
-  subName   String?
-  idMA      String
-  idTP      String
-  createdAt DateTime @default(now())
-  updatedAt DateTime @default(now())
-  ma        ma?      @relation(fields: [idMA], references: [id])
-  tp        tp?      @relation(fields: [idTP], references: [id])
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  journalAssignments JournalAssignment[] 
-  journalSlots       JournalSlot[]       
+  id                 String              @id
+  userId             String              @unique
+  name               String
+  subName            String?
+  idMA               String?
+  idTP               String?
+  createdAt          DateTime            @default(now())
+  updatedAt          DateTime            @default(now())
+  ma                 ma?                 @relation(fields: [idMA], references: [id])
+  tp                 tp?                 @relation(fields: [idTP], references: [id])
+  user               User                @relation(fields: [userId], references: [id], onDelete: Cascade)
+  entretien          entretien[]
+  journalAssignments JournalAssignment[]
+  journalSlots       JournalSlot[]
 
+  @@index([idMA])
 }
 
 model ma {
@@ -121,14 +123,109 @@ model tp {
   user      User       @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
+model JournalTemplate {
+  id          Int                 @id @default(autoincrement())
+  code        String              @unique
+  Titre       String
+  periode     String
+  description String?
+  deadline    DateTime?
+  createdAt   DateTime            @default(now())
+  updatedAt   DateTime            @updatedAt
+  assignment  JournalAssignment[]
+  slot        JournalSlot?        @relation("TemplateSlots")
+
+  @@map("journal_template")
+}
+
+model JournalAssignment {
+  id         Int              @id @default(autoincrement())
+  templateId Int
+  apprentiId String
+  statut     AssignmentStatut @default(EN_COURS)
+  createdAt  DateTime         @default(now())
+  updatedAt  DateTime         @updatedAt
+  documents  Document[]
+  apprenti   apprenti         @relation(fields: [apprentiId], references: [id])
+  template   JournalTemplate  @relation(fields: [templateId], references: [id])
+  review     review?
+
+  @@map("journal_assignment")
+}
+
+model JournalSlot {
+  id                Int             @id @default(autoincrement())
+  journalTemplateId Int             @unique
+  apprentiId        String?
+  titre             String
+  instruction       String?
+  mimeAuthorized    String?
+  maxSize           Int?
+  dueAt             DateTime?
+  isrequired        Boolean         @default(true)
+  statut            SlotStatut      @default(PENDING)
+  lastsubmissionAt  DateTime?
+  nbFiles           Int             @default(0)
+  createdAt         DateTime        @default(now())
+  updatedAt         DateTime        @updatedAt
+  documents         Document[]
+  apprenti          apprenti?       @relation(fields: [apprentiId], references: [id])
+  template          JournalTemplate @relation("TemplateSlots", fields: [journalTemplateId], references: [id])
+
+  @@map("journal_slot")
+}
+
+model Document {
+  id                  Int                @id @default(autoincrement())
+  journalSlotId       Int?
+  journalAssignmentId Int?
+  fileName            String
+  mimeType            String
+  size                Int
+  url                 String
+  status              DocStatus          @default(UPLOADED)
+  createdAt           DateTime           @default(now())
+  assignment          JournalAssignment? @relation(fields: [journalAssignmentId], references: [id], onDelete: Cascade)
+  slot                JournalSlot?       @relation(fields: [journalSlotId], references: [id], onDelete: Cascade)
+
+  @@map("document")
+}
+
+model entretien {
+  id           Int      @id @default(autoincrement())
+  date         DateTime
+  heure        String
+  theme        String?
+  participants String
+  apprentiId   String
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime
+  apprenti     apprenti @relation(fields: [apprentiId], references: [id], onDelete: Cascade)
+}
+
+model review {
+  id                 Int               @id @default(autoincrement())
+  assignmentId       Int               @unique
+  maId               String
+  note               Int?
+  commentaire        String?
+  createdAt          DateTime          @default(now())
+  updatedAt          DateTime
+  journal_assignment JournalAssignment @relation(fields: [assignmentId], references: [id], onDelete: Cascade)
+  user               User              @relation(fields: [maId], references: [id], onDelete: Cascade)
+
+  @@index([assignmentId])
+  @@index([maId])
+}
+
 enum Role {
-  USER
-  ADMIN
   APPRENTI
   MA
   TP
-  CA
   RH
+  USER
+  ADMIN
+  CA
 }
 
 enum SlotStatut {
@@ -149,80 +246,4 @@ enum DocStatus {
   SUBMITTED
   APPROVED
   REJECTED
-}
-
-model JournalTemplate {
-  id          Int      @id @default(autoincrement())
-  code        String   @unique
-  Titre       String
-  periode     String
-  description String?
-  deadline    DateTime?
-  slot       JournalSlot?       @relation("TemplateSlots")
-  assignment JournalAssignment[]
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-
-  @@map("journal_template")
-}
-
-model JournalAssignment {
-  id         Int              @id @default(autoincrement())
-  templateId Int
-  apprentiId String
-  statut     AssignmentStatut @default(EN_COURS)
-
-  template  JournalTemplate @relation(fields: [templateId], references: [id])
-  apprenti  apprenti        @relation(fields: [apprentiId], references: [id])
-  createdAt DateTime        @default(now())
-  updatedAt DateTime        @updatedAt
-
-  documents Document[]
-
-  @@map("journal_assignment")
-}
-
-model JournalSlot {
-  id              Int         @id @default(autoincrement())
-  journalTemplateId Int         @unique
-  apprentiId      String?
-  titre           String
-  instruction     String?
-  mimeAuthorized  String?
-  maxSize         Int?
-  dueAt           DateTime?
-  isrequired      Boolean     @default(true)
-
-  statut          SlotStatut  @default(PENDING)
-  lastsubmissionAt DateTime?
-  nbFiles         Int         @default(0)
-
-  template        JournalTemplate @relation("TemplateSlots", fields: [journalTemplateId], references: [id])
-  apprenti        apprenti?       @relation(fields: [apprentiId], references: [id])
-  createdAt       DateTime        @default(now())
-  updatedAt       DateTime        @updatedAt
-
-  documents      Document[]
-  @@map("journal_slot")
-}
-
-model Document {
-  id Int @id @default(autoincrement())
-
-  // lier EITHER à un slot, OR directement à l’affectation (journal sans slots)
-  journalSlotId       Int?
-  journalAssignmentId Int?
-
-  slot       JournalSlot?       @relation(fields: [journalSlotId], references: [id], onDelete: Cascade)
-  assignment JournalAssignment? @relation(fields: [journalAssignmentId], references: [id], onDelete: Cascade)
-
-  fileName String
-  mimeType String
-  size     Int
-  url      String
-
-  status    DocStatus @default(UPLOADED)
-  createdAt DateTime  @default(now())
-
-  @@map("document")
 }

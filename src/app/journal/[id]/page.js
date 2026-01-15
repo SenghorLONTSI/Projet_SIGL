@@ -104,7 +104,11 @@ export default async function JournalDetailPage({ params }) {
             1 seul fichier est requis pour ce journal.
           </p>
 
-          <UploadDocument journalAssignmentId={assignment.id} />
+          {/* ✅ IMPORTANT : on passe le doc soumis au composant */}
+          <UploadDocument
+            journalAssignmentId={assignment.id}
+            initialDocument={assignment.documents?.[0] ?? null}
+          />
         </section>
       </div>
     </main>

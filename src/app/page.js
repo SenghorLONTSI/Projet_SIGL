@@ -111,7 +111,7 @@ export default async function HomePage() {
             <div className="flex justify-between items-center mb-2">
               <h2 className="text-sm font-semibold">Évènements</h2>
               <Link
-                href="/evenements"
+                href="/entretiens"
                 className="text-xs text-[#5141d6] font-medium"
               >
                 Voir plus

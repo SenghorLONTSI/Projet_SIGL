@@ -32,7 +32,14 @@ export async function POST(req) {
     const body = await req.json();
     const journalAssignmentId = Number(body?.journalAssignmentId);
     const tempKey = body?.tempKey;
-    const meta = body?.meta || {};
+
+    // ✅ IMPORTANT : ton front envoie fileName/mimeType/size au niveau root,
+    // pas dans body.meta. Donc on reconstruit meta ici :
+    const meta = {
+      fileName: body?.fileName,
+      mimeType: body?.mimeType,
+      size: body?.size,
+    };
 
     if (!journalAssignmentId || Number.isNaN(journalAssignmentId)) {
       return NextResponse.json(
@@ -47,12 +54,19 @@ export async function POST(req) {
       );
     }
 
-    // Si déjà soumis -> on bloque
+    // Si déjà soumis -> on renvoie le doc existant + on force TERMINE
     const existing = await prisma.document.findFirst({
       where: { journalAssignmentId },
       orderBy: { createdAt: "desc" },
     });
+
     if (existing) {
+      // ✅ Assure que le statut est bien TERMINE
+      await prisma.journalAssignment.update({
+        where: { id: journalAssignmentId },
+        data: { statut: "TERMINE" },
+      });
+
       return NextResponse.json({
         ok: true,
         document: existing,
@@ -64,8 +78,10 @@ export async function POST(req) {
     const tmpPath = path.join(TMP_DIR, tempKey);
     const buffer = await fs.readFile(tmpPath);
 
-    // Conserver le vrai nom
+    // Conserver le vrai nom (pour affichage)
     const originalName = safeName(meta.fileName || "document");
+
+    // ✅ Nom stocké (fichier physique) = unique pour éviter collisions
     const ext = path.extname(originalName) || path.extname(tempKey) || "";
     const storedName = `${crypto.randomUUID()}${ext}`;
     const finalPath = path.join(FINAL_DIR, storedName);
@@ -74,15 +90,22 @@ export async function POST(req) {
 
     const url = `/uploads/documents/${storedName}`;
 
+    // Création en base du Document
     const created = await prisma.document.create({
       data: {
         journalAssignmentId,
-        fileName: originalName,          // ✅ vrai nom
+        fileName: originalName, // ✅ nom réel affiché
         mimeType: meta.mimeType || "application/octet-stream",
-        size: meta.size || buffer.length,
-        url,                             // ✅ url fichier stocké
+        size: Number(meta.size) || buffer.length,
+        url,
         status: "UPLOADED",
       },
+    });
+
+    // ✅ STATUT AUTO : soumis => TERMINE
+    await prisma.journalAssignment.update({
+      where: { id: journalAssignmentId },
+      data: { statut: "TERMINE" },
     });
 
     // Supprimer le brouillon tmp
