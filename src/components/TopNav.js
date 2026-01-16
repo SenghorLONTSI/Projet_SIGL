@@ -1,13 +1,14 @@
 // src/components/TopNav.js
-"use client";
+// "use client";
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
-import { getSession } from "@/lib/auth-server";
+// import { usePathname } from "next/navigation";
+import { getUser } from "@/lib/auth-server";
 
-export default function TopNav() {
-  const pathname = usePathname();
-  const role = getSession()?.user?.role || null;
+export default async function TopNav() {
+  // const pathname = usePathname();
+  const user = await getUser()
+  const role = user?.role || null;
 
 
   const linkBase =
@@ -16,7 +17,7 @@ export default function TopNav() {
   const linkInactive =
     "bg-white text-slate-700 border border-slate-200 hover:bg-slate-50";
 
-  if (role === "MA") {
+  if (role === "APPRENTI") {
 
 
     return (
@@ -30,8 +31,8 @@ export default function TopNav() {
               href="/"
               className={
                 linkBase +
-                " " +
-                (pathname === "/" ? linkActive : linkInactive)
+                " "
+                // (pathname === "/" ? linkActive : linkInactive)
               }
             >
               Accueil
@@ -40,8 +41,8 @@ export default function TopNav() {
               href="/journal"
               className={
                 linkBase +
-                " " +
-                (pathname.startsWith("/journal") ? linkActive : linkInactive)
+                " "
+                // (pathname.startsWith("/journal") ? linkActive : linkInactive)
               }
             >
               Journaux

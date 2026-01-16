@@ -14,6 +14,7 @@ import DropdownMenuUser from "@/components/DropdownMenuUser";
 import { fi } from "zod/v4/locales";
 import { Spinner } from "../ui/spinner";
 import Link from "next/link";
+import TopNav from "@/components/TopNav";
 
 const HomePageCA = (props) => {
   const [users, setUsers] = useState([]);
@@ -260,12 +261,14 @@ const HomePageCA = (props) => {
                       })}
                     </ScrollArea>
                   )}
-                  <Button
-                    variant="ghost"
-                    className="mt-4 w-full rounded-full bg-[#f1edf8] text-[#1f1b4a] hover:bg-[#e7e0f6]"
-                  >
-                    <Link href="/admin/user">Voir plus</Link>
-                  </Button>
+                  <Link href="/admin/user">
+                    <Button
+                      variant="ghost"
+                      className="mt-4 w-full rounded-full bg-[#f1edf8] text-[#1f1b4a] hover:bg-[#e7e0f6]"
+                    >
+                      Voir plus
+                    </Button>
+                  </Link>
                 </CardContent>
               </Card>
 

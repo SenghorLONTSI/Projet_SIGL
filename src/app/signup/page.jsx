@@ -120,101 +120,101 @@ const pageSignUp = () => {
         <div className="w-full col-start-2 ">
           <div className="grid grid-row min-h-screen px-4">
             <h1
-              className={`text-xl text-center md:text-left font-weight-900 font-extrabold m-4 p-8 text-[#1f1b4a] lg:text-3xl ${fonts.className}`}
+              className={`text-xl text-center md:text-left font-weight-900 font-extrabold m-8 text-[#1f1b4a] lg:text-3xl ${fonts.className}`}
             >
               Page d'inscription
             </h1>
             <div className="flex flex-col justify-center align-center">
-            <Card
-              className={`w-full max-w-md mx-auto my-20 ${fonts.className}`}
-            >
-              <CardHeader>
-                <CardTitle>Crée ton compte</CardTitle>
-                <CardDescription>
-                  Veuillez remplir les informations ci-dessous
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <Form {...form}>
-                  <form
-                    onSubmit={form.handleSubmit(onSubmit)}
-                    className="space-y-8"
-                  >
-                    <FormField
-                      control={form.control}
-                      name="name"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Nom</FormLabel>
-                          <FormControl>
-                            <Input
-                              type="text"
-                              placeholder="Atango"
-                              {...field}
-                            />
-                          </FormControl>
-                          {/* <FormDescription>
+              <Card
+                className={`w-full max-w-md mx-auto my-20 ${fonts.className}`}
+              >
+                <CardHeader>
+                  <CardTitle>Crée ton compte</CardTitle>
+                  <CardDescription>
+                    Veuillez remplir les informations ci-dessous
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <Form {...form}>
+                    <form
+                      onSubmit={form.handleSubmit(onSubmit)}
+                      className="space-y-8"
+                    >
+                      <FormField
+                        control={form.control}
+                        name="name"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Nom</FormLabel>
+                            <FormControl>
+                              <Input
+                                type="text"
+                                placeholder="Atango"
+                                {...field}
+                              />
+                            </FormControl>
+                            {/* <FormDescription>
                     This is your public display name.
                   </FormDescription> */}
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                    <FormField
-                      control={form.control}
-                      name="password"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Mot de passe</FormLabel>
-                          <FormControl>
-                            <Input
-                              type="password"
-                              placeholder="********"
-                              {...field}
-                            />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                    <FormField
-                      control={form.control}
-                      name="email"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Adresse email</FormLabel>
-                          <FormControl>
-                            <Input
-                              type="email"
-                              placeholder="atanjunior@mail.com"
-                              {...field}
-                            />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                    <div className="flex flex-col gap-2">
-                      <Button
-                        className=" relative bg-[#2a176e] hover:bg-[#422c9f] focus:ring-4 focus:ring-blue-300 text-white w-full"
-                        type="submit"
-                        disabled={!loading}
-                      >
-                        Crée ton compte
-                      </Button>
-                    </div>
-                  </form>
-                </Form>
-              </CardContent>
-              <CardFooter className="flex flex-col space-y-2">
-                <p className="text-sm text-muted-foreground text-center font-light">
-                  Tu as déjà un compte ?{" "}
-                  <a href="/login" className="text-blue-500 hover:underline">
-                    Connecte-toi
-                  </a>
-                </p>
-              </CardFooter>
-            </Card>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                      <FormField
+                        control={form.control}
+                        name="password"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Mot de passe</FormLabel>
+                            <FormControl>
+                              <Input
+                                type="password"
+                                placeholder="********"
+                                {...field}
+                              />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                      <FormField
+                        control={form.control}
+                        name="email"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Adresse email</FormLabel>
+                            <FormControl>
+                              <Input
+                                type="email"
+                                placeholder="atanjunior@mail.com"
+                                {...field}
+                              />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                      <div className="flex flex-col gap-2">
+                        <Button
+                          className=" relative bg-[#2a176e] hover:bg-[#422c9f] focus:ring-4 focus:ring-blue-300 text-white w-full"
+                          type="submit"
+                          disabled={!loading}
+                        >
+                          Crée ton compte
+                        </Button>
+                      </div>
+                    </form>
+                  </Form>
+                </CardContent>
+                <CardFooter className="flex flex-col space-y-2">
+                  <p className="text-sm text-muted-foreground text-center font-light">
+                    Tu as déjà un compte ?{" "}
+                    <a href="/login" className="text-blue-500 hover:underline">
+                      Connecte-toi
+                    </a>
+                  </p>
+                </CardFooter>
+              </Card>
             </div>
             <span
               className={`flex flex-col justify-end p-4 text-sm text-center text-gray-500 ${fonts.className}`}

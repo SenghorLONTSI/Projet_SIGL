@@ -65,8 +65,8 @@ export async function GET(_request, { params }) {
         }
 
         const apprenti = await prisma.apprenti.findUnique({
-            where: { id: (id) },
-            include: { user: true },
+            where: { userId: id },
+            include: { user: true, ma: true, tp: true },
         });
         if (!apprenti) {
             return new Response(JSON.stringify({ error: "Apprenti not found" }), { status: 404 });
@@ -80,5 +80,41 @@ export async function GET(_request, { params }) {
             status: 500,
             headers: { "Content-Type": "application/json" },
         });
+    }
+}
+
+export async function PATCH(request, { params }) {
+    try {
+        const session = await getSession();
+        if (!session) {
+            return new Response(JSON.stringify({ error: "Unauthorized" }), { status: 401 });
+        }
+
+        const { id } = await params; // id ici correspond au userId de l'apprenti
+        const body = await request.json();
+        const data = {};
+
+        // Gestion du Maître d'Apprentissage (MA)
+
+        if (Object.prototype.hasOwnProperty.call(body, "maUserId")) {
+            data.idMA = body.maUserId || null; // null ou "" => retire le MA
+        }
+
+        // Si le front envoie explicitement idTP (même null), on le traite
+        if (Object.prototype.hasOwnProperty.call(body, "tpUserId")) {
+            data.idTP = body.tpUserId || null; // null ou "" => retire le TP
+
+            // Mise à jour de l'apprenti
+            const updatedApprenti = await prisma.apprenti.update({
+                where: { userId: id },
+                data,
+                include: { ma: true, tp: true },
+            });
+
+            return new Response(JSON.stringify(updatedApprenti), { status: 200 });
+        }
+    } catch (err) {
+        console.error("Erreur lors de la mise à jour de l'apprenti:", err);
+        return new Response(JSON.stringify({ error: "Internal Server Error" }), { status: 500 });
     }
 }
