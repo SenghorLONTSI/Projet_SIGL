@@ -540,7 +540,7 @@ export default async function HomePage() {
 
                                 {/* Ligne secondaire */}
                                 {n.type === "ENTRETIEN" ? (
-                                  <p className="text-xs text-slate-500"> A programmé un entretien avec vous pour le 
+                                  <p className="text-xs text-slate-500"> A programmé un entretien avec vous le 
                                     {/*n.templateTitle} —*/} {formatDate(n.entretien?.date)} à {n.entretien?.heure}
                                   </p>
                                 ) : (
