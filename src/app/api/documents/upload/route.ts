@@ -3,6 +3,8 @@ import { prisma } from "@/lib/prisma";
 import { auth } from "@/lib/auth";
 import { writeFile, mkdir } from "fs/promises";
 import path from "path";
+// 📢 Import nanoid pour générer des IDs uniques pour les notifications
+import { customAlphabet } from "nanoid";
 
 export async function POST(req: Request) {
   try {
@@ -82,6 +84,45 @@ export async function POST(req: Request) {
         journalAssignmentId: journalAssignmentId ? Number(journalAssignmentId) : null,
       },
     });
+
+    // ============================================================
+    // 6️⃣ 📢 SYSTÈME DE NOTIFICATIONS - Créer des notifications
+    // ============================================================
+    // Quand un apprenti upload un document, on envoie des
+    // notifications à son TP et son MA via le système
+    // de notification temps réel (polling toutes les 10s).
+    const apprenti = user.apprenti;
+    
+    // Générer un ID unique pour les notifications (21 caractères)
+    const nanoid = customAlphabet('1234567890abcdefghijklmnopqrstuvwxyz', 21);
+    
+    // Créer notification pour TP
+    // if (apprenti.idTP) {
+    //   await prisma.notification.create({
+    //     data: {
+    //       id: nanoid(),
+    //       userId: apprenti.idTP,
+    //       apprentiId: apprenti.id,
+    //       type: "DOCUMENT_UPLOAD",
+    //       title: `Nouveau document uploadé`,
+    //       description: `${user.name} ${user.subName} a uploadé ${file.name}`,
+    //     },
+    //   });
+    // }
+
+    // // Créer notification pour MA
+    // if (apprenti.idMA) {
+    //   await prisma.notification.create({
+    //     data: {
+    //       id: nanoid(),
+    //       userId: apprenti.idMA,
+    //       apprentiId: apprenti.id,
+    //       type: "DOCUMENT_UPLOAD",
+    //       title: `Nouveau document uploadé`,
+    //       description: `${user.name} ${user.subName} a uploadé ${file.name}`,
+    //     },
+    //   });
+    // }
 
     return NextResponse.json({ success: true, document: doc });
 

@@ -342,7 +342,7 @@ export default function CalendarManagement({ events = [], onAddEvent, onDeleteEv
                         </div>
                         <h4 className="font-semibold text-sm text-slate-900">{event.title}</h4>
                       </div>
-                      {(userRole === "MA" || userRole === "TP") && onDeleteEvent && (
+                      {(userRole === "MA" || userRole === "TP" || userRole === "APPRENTI") && onDeleteEvent && (
                         <Button
                           variant="ghost"
                           size="sm"
@@ -412,7 +412,7 @@ export default function CalendarManagement({ events = [], onAddEvent, onDeleteEv
                         </div>
                         <h4 className="font-semibold text-base text-slate-900">{event.title}</h4>
                       </div>
-                      {(userRole === "MA" || userRole === "TP") && onDeleteEvent && (
+                      {(userRole === "MA" || userRole === "TP" || userRole === "APPRENTI") && onDeleteEvent && (
                         <Button
                           variant="ghost"
                           size="sm"

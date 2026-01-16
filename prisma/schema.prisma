@@ -19,22 +19,21 @@ model Post {
 }
 
 model User {
-  id            String    @id
+  id            String         @id
   name          String
   subName       String?
-  email         String    @unique
+  email         String         @unique
   emailVerified Boolean
   image         String?
-  role          Role      @default(USER)
+  role          Role           @default(USER)
   createdAt     DateTime
   updatedAt     DateTime
   accounts      Account[]
   apprenti      apprenti?
-
   events        Event[]
-
   ma            ma?
-  maReviews     Review[]  @relation("MAUserReviews")
+  notification  notification[]
+  maReviews     Review[]       @relation("MAUserReviews")
   sessions      Session[]
   tp            tp?
 
@@ -98,13 +97,11 @@ model apprenti {
   tp                 tp?                 @relation(fields: [idTP], references: [id])
   user               User                @relation(fields: [userId], references: [id], onDelete: Cascade)
   entretien          entretien[]
-
-  events             Event[]
-
   entretien2         entretien2[]
-  
+  events             Event[]
   journalAssignments JournalAssignment[]
   journalSlots       JournalSlot[]
+  notification       notification[]
 
   @@index([idMA])
 }
@@ -215,7 +212,6 @@ model Document {
   @@map("document")
 }
 
-
 model Event {
   id          String    @id @default(cuid())
   title       String
@@ -237,7 +233,6 @@ model Event {
   @@map("event")
 }
 
-
 model entretien {
   id           Int      @id @default(autoincrement())
   date         DateTime
@@ -249,9 +244,6 @@ model entretien {
   updatedAt    DateTime @updatedAt
   apprenti     apprenti @relation(fields: [apprentiId], references: [id], onDelete: Cascade)
 }
-
-
-
 
 model entretien2 {
   id           Int      @id @default(autoincrement())
@@ -265,6 +257,21 @@ model entretien2 {
   apprenti     apprenti @relation(fields: [apprentiId], references: [id], onDelete: Cascade)
 }
 
+model notification {
+  id          String    @id
+  userId      String
+  apprentiId  String?
+  type        String
+  title       String
+  description String?
+  isRead      Boolean   @default(false)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @default(now())
+  apprenti    apprenti? @relation(fields: [apprentiId], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@index([userId])
+}
 
 enum Role {
   APPRENTI

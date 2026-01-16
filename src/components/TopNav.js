@@ -4,6 +4,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import DropdownMenuUser from "./DropdownMenuUser";
+import NotificationBell from "./NotificationBell";
 
 export default function TopNav({ role, user }) {
   const pathname = usePathname();
@@ -22,7 +23,7 @@ export default function TopNav({ role, user }) {
           <div className="font-semibold text-slate-800">
             Livret d&apos;alternance
           </div>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-4">
             <Link
               href="/"
               className={
@@ -43,6 +44,7 @@ export default function TopNav({ role, user }) {
             >
               Journaux
             </Link>
+            <NotificationBell />
           </div>
         </div>
       </nav>
@@ -104,6 +106,7 @@ export default function TopNav({ role, user }) {
             >
               Accueil
             </Link>
+            <NotificationBell />
             <DropdownMenuUser name={fullName} email={user?.email} />
           </div>
         </div>
