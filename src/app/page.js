@@ -145,7 +145,7 @@ export default async function HomePage() {
 
     return (
       <main className="min-h-screen bg-gradient-to-b from-sky-50 via-sky-100 to-sky-50">
-        <TopNav role="APPRENTI" />
+        <TopNav role="APPRENTI" user={user} />
 
         <div className="max-w-5xl mx-auto px-6 py-10 space-y-8">
           {/* Header : bienvenue */}
@@ -282,6 +282,18 @@ export default async function HomePage() {
               Mes documents
             </h2>
             <UploadDashboard user={session.user} />
+          </section>
+
+          {/* Section Calendrier */}
+          <section className="space-y-3">
+            <h2 className="text-lg font-semibold text-slate-900">
+              Calendrier des événements
+            </h2>
+            <Card>
+              <CardContent className="p-6">
+                <ApprentiCalendarWrapper user={session.user} />
+              </CardContent>
+            </Card>
           </section>
         </div>
       </main>

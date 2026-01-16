@@ -94,7 +94,14 @@ const pageSignIn = () => {
         mobileOffset={{ bottom: "16px" }}
       />
       <div className="flex md:grid md:grid-cols-2 w-full">
-        <div className="hidden min-h-screen w-full md:block md:-mx-4 md:-right-16 bg-gradient-to-r rounded-r-xl from-[#2a176e] via-[#422c9f] to-[#6a51de] overflow-hidden"></div>
+        <div className="hidden md:flex md:flex-col min-h-screen w-full md:-mx-4 md:-right-16 bg-gradient-to-r rounded-r-xl from-[#2a176e] via-[#422c9f] to-[#6a51de] overflow-hidden items-center justify-center">
+          <h1 className={`text-5xl font-extrabold text-white mb-4 ${fonts.className}`}>
+            CapApprenti
+          </h1>
+          <p className="text-white/80 text-lg text-center px-8">
+            Votre plateforme de gestion d'apprentissage
+          </p>
+        </div>
 
         <div className="w-full col-start-2 ">
           <div className="grid grid-row min-h-screen px-4">

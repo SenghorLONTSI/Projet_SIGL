@@ -3,8 +3,9 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import DropdownMenuUser from "./DropdownMenuUser";
 
-export default function TopNav({ role }) {
+export default function TopNav({ role, user }) {
   const pathname = usePathname();
 
 
@@ -49,9 +50,64 @@ export default function TopNav({ role }) {
   }
 
   if (role === "APPRENTI") {
+    const fullName = `${user?.name || ""} ${user?.subName || ""}`.trim() || "Apprenti";
     return (
-      <>
-      </>
-    )
+      <nav className="w-full border-b border-sky-200 bg-white/80 backdrop-blur-md mb-6">
+        <div className="max-w-5xl mx-auto flex items-center justify-between px-4 py-3">
+          <div className="font-semibold text-slate-800">
+            Livret d&apos;alternance
+          </div>
+          <div className="flex items-center gap-4">
+            <Link
+              href="/"
+              className={
+                linkBase +
+                " " +
+                (pathname === "/" ? linkActive : linkInactive)
+              }
+            >
+              Accueil
+            </Link>
+            <Link
+              href="/journal"
+              className={
+                linkBase +
+                " " +
+                (pathname.startsWith("/journal") ? linkActive : linkInactive)
+              }
+            >
+              Journaux
+            </Link>
+            <DropdownMenuUser name={fullName} email={user?.email} />
+          </div>
+        </div>
+      </nav>
+    );
+  }
+
+  if (role === "TP") {
+    const fullName = `${user?.name || ""} ${user?.subName || ""}`.trim() || "Tuteur";
+    return (
+      <nav className="w-full border-b border-slate-200 bg-white/80 backdrop-blur-md mb-6">
+        <div className="mx-auto flex items-center justify-between px-6 py-3">
+          <div className="font-semibold text-slate-800">
+            Livret d&apos;alternance
+          </div>
+          <div className="flex items-center gap-4">
+            <Link
+              href="/"
+              className={
+                linkBase +
+                " " +
+                (pathname === "/" ? linkActive : linkInactive)
+              }
+            >
+              Accueil
+            </Link>
+            <DropdownMenuUser name={fullName} email={user?.email} />
+          </div>
+        </div>
+      </nav>
+    );
   }
 }

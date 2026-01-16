@@ -3,6 +3,7 @@ import { getSession } from "@/lib/auth-server";
 import { redirect } from "next/navigation";
 import Link from "next/link";
 
+import TopNav from "@/components/TopNav";
 import DropdownMenuUser from "@/components/DropdownMenuUser";
 import ApprentiCalendarWrapper from "@/components/calendar/ApprentiCalendarWrapper";
 
@@ -168,6 +169,7 @@ export default async function TPAccueilPage() {
 
   return (
     <main className="min-h-fit bg-[#F3F4FF] text-slate-900">
+      <TopNav role="TP" user={user} />
       <div className="w-full px-6 py-8 space-y-6">
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-10">
           {/* ===================== COLONNE GAUCHE ===================== */}

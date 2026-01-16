@@ -17,8 +17,18 @@ const DropdownMenuUser = (props) => {
   const router = useRouter();
 
   const handleSignOut = async () => {
-    await authClient.signOut();
-    router.push("/login");
+    try {
+      await authClient.signOut({
+        fetchOptions: {
+          onSuccess: () => {
+            router.push("/login");
+          },
+        },
+      });
+    } catch (error) {
+      console.error("Erreur de déconnexion:", error);
+      router.push("/login");
+    }
   };
 
   return (
