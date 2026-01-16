@@ -30,11 +30,9 @@ model User {
   updatedAt     DateTime
   accounts      Account[]
   apprenti      apprenti?
-<<<<<<< HEAD
+
   events        Event[]
-=======
-  event         event[]
->>>>>>> notif_ma
+
   ma            ma?
   maReviews     Review[]  @relation("MAUserReviews")
   sessions      Session[]
@@ -100,12 +98,11 @@ model apprenti {
   tp                 tp?                 @relation(fields: [idTP], references: [id])
   user               User                @relation(fields: [userId], references: [id], onDelete: Cascade)
   entretien          entretien[]
-<<<<<<< HEAD
+
   events             Event[]
-=======
+
   entretien2         entretien2[]
-  event              event[]
->>>>>>> notif_ma
+  
   journalAssignments JournalAssignment[]
   journalSlots       JournalSlot[]
 
@@ -218,7 +215,7 @@ model Document {
   @@map("document")
 }
 
-<<<<<<< HEAD
+
 model Event {
   id          String    @id @default(cuid())
   title       String
@@ -240,8 +237,7 @@ model Event {
   @@map("event")
 }
 
-=======
->>>>>>> notif_ma
+
 model entretien {
   id           Int      @id @default(autoincrement())
   date         DateTime
@@ -250,12 +246,11 @@ model entretien {
   participants String
   apprentiId   String
   createdAt    DateTime @default(now())
-  updatedAt    DateTime
+  updatedAt    DateTime @updatedAt
   apprenti     apprenti @relation(fields: [apprentiId], references: [id], onDelete: Cascade)
 }
 
-<<<<<<< HEAD
-=======
+
 model event {
   id          String    @id
   title       String
@@ -288,7 +283,7 @@ model entretien2 {
   apprenti     apprenti @relation(fields: [apprentiId], references: [id], onDelete: Cascade)
 }
 
->>>>>>> notif_ma
+
 enum Role {
   APPRENTI
   MA
