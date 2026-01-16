@@ -147,16 +147,19 @@ export default async function HomePage() {
       <main className="min-h-screen bg-gradient-to-b from-sky-50 via-sky-100 to-sky-50">
         <TopNav role="APPRENTI" user={user} />
 
-        <div className="max-w-5xl mx-auto px-6 py-10 space-y-8">
-          {/* Header : bienvenue */}
-          <header className="space-y-2">
-            <h1 className="text-4xl font-extrabold tracking-tight text-slate-900">
-              Bonjour {user.firstName || ""} {user.lastName || ""}
-            </h1>
-            <p className="text-slate-700 text-sm sm:text-base">
-              Bienvenue sur votre espace apprenti. Retrouvez ici une synthèse de vos journaux.
-            </p>
-          </header>
+        <div className="w-full px-6 py-8 space-y-6">
+          <div className="grid grid-cols-1 lg:grid-cols-4 gap-10">
+            {/* COLONNE GAUCHE */}
+            <div className="lg:col-span-3 space-y-8">
+              {/* Header : bienvenue */}
+              <header className="space-y-2">
+                <h1 className="text-3xl font-extrabold tracking-tight text-slate-900">
+                  Bonjour {user.name || ""} {user.subName || ""}
+                </h1>
+                <p className="text-slate-700 text-sm sm:text-base">
+                  Bienvenue sur votre espace apprenti. Retrouvez ici une synthèse de vos journaux.
+                </p>
+              </header>
 
           {/* Cartes de synthèse */}
           <section className="grid grid-cols-1 sm:grid-cols-4 gap-4">
@@ -295,6 +298,56 @@ export default async function HomePage() {
               </CardContent>
             </Card>
           </section>
+            </div>
+
+            {/* COLONNE DROITE */}
+            <div className="w-full p-5 bg-white md:col-span-1">
+              <div className="hidden items-center justify-end gap-3 text-sm bg-white px-3 py-2 lg:flex">
+                <div className="text-right">
+                  <p className="text-sm font-semibold text-slate-900">{user.name} {user.subName}</p>
+                  <p className="text-xs uppercase tracking-wide text-slate-500">
+                    {session?.user?.role}
+                  </p>
+                </div>
+                <Avatar className="h-10 w-10">
+                  <AvatarFallback className="bg-sky-200 text-slate-900">
+                    {((user.name || "") + (user.subName || ""))
+                      .split(" ")
+                      .filter(Boolean)
+                      .map((p) => p[0])
+                      .join("")
+                      .slice(0, 2)
+                      .toUpperCase()}
+                  </AvatarFallback>
+                </Avatar>
+              </div>
+
+              <div className="lg:col-span-1 bg-white space-y-4">
+                {/* Contacts importants */}
+                <Card className="rounded-3xl border-none bg-gradient-to-br from-[#2a176e] via-[#422c9f] to-[#6a51de] text-white shadow-lg">
+                  <CardHeader className="pb-3">
+                    <CardTitle className="text-lg">Contacts importants</CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-3">
+                    <div className="space-y-1">
+                      <p className="text-sm font-semibold">Référent CFA</p>
+                      <p className="text-xs text-white/80">cfa@ecole.fr — 01 00 00 00 00</p>
+                      <Separator className="bg-white/20" />
+                    </div>
+                    <div className="space-y-1">
+                      <p className="text-sm font-semibold">Chargé OPCO</p>
+                      <p className="text-xs text-white/80">opco@opco.fr — 09 99 99 99 99</p>
+                      <Separator className="bg-white/20" />
+                    </div>
+                    <div className="space-y-1">
+                      <p className="text-sm font-semibold">Responsable pédagogique</p>
+                      <p className="text-xs text-white/80">pedago@ecole.fr — 01 22 33 44 55</p>
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
+            </div>
+          </div>
         </div>
       </main>
     );

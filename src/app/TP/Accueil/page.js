@@ -95,8 +95,29 @@ async function getTPData(userId) {
       },
     }));
 
+    // Activités: événements du calendrier
+    const events = await prisma.event.findMany({
+      where: { apprentiId: { in: apprentiIds } },
+      orderBy: { createdAt: "desc" },
+      take: 8,
+      include: { apprenti: { include: { user: true } } },
+    });
+
+    const eventNotifs = events.map((ev) => ({
+      id: `event-${ev.id}`,
+      type: "EVENEMENT",
+      apprentiName: `${ev.apprenti?.user?.name ?? ""} ${ev.apprenti?.user?.subName ?? ""}`.trim(),
+      templateTitle: ev.title || "Événement",
+      statut: "PLANIFIE",
+      createdAt: ev.createdAt,
+      event: {
+        date: ev.date,
+        description: ev.description,
+      },
+    }));
+
     // Fusion + tri
-    const notifications = [...journalNotifs, ...entretienNotifs]
+    const notifications = [...journalNotifs, ...entretienNotifs, ...eventNotifs]
       .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
       .slice(0, 8);
 
@@ -346,7 +367,7 @@ export default async function TPAccueilPage() {
                 <CardHeader className="pb-2">
                   <CardTitle className="text-base text-[#1f1b4a]">Activités récentes</CardTitle>
                   <p className="text-xs text-slate-500">
-                    Derniers journaux et entretiens
+                    Derniers journaux, entretiens et événements
                   </p>
                 </CardHeader>
 
@@ -375,6 +396,10 @@ export default async function TPAccueilPage() {
                               <p className="text-xs text-slate-500">
                                 A programmé un entretien le {formatDate(n.entretien?.date)} à{" "}
                                 {n.entretien?.heure}
+                              </p>
+                            ) : n.type === "EVENEMENT" ? (
+                              <p className="text-xs text-slate-500">
+                                {n.templateTitle} — {formatDate(n.event?.date)}
                               </p>
                             ) : (
                               <p className="text-xs text-slate-500">
